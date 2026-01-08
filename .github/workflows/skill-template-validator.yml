@@ -141,10 +141,14 @@ jobs:
                   print('📋 SKILL TEMPLATE VALIDATION REPORT')
                   print('='*60)
                   
+                  total_skills = self.stats['total_skills']
+                  valid_skills = self.stats['valid_skills']
+                  success_rate = (valid_skills/max(total_skills, 1)*100)
+                  
                   print(f'\n📊 Statistics:')
-                  print(f'  Total Skills Checked: {self.stats[\"total_skills\"]}')
-                  print(f'  Valid Skills: {self.stats[\"valid_skills\"]}')
-                  print(f'  Success Rate: {(self.stats[\"valid_skills\"]/max(self.stats[\"total_skills\"], 1)*100):.1f}%')
+                  print(f'  Total Skills Checked: {total_skills}')
+                  print(f'  Valid Skills: {valid_skills}')
+                  print(f'  Success Rate: {success_rate:.1f}%')
                   
                   if self.errors:
                       print(f'\n❌ Errors ({len(self.errors)}):')
