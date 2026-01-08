@@ -184,16 +184,49 @@ jobs:
                   if skills_dir.exists():
                       print(f'📁 Scanning {display_name} directory...')
                       
-                      for category_dir in skills_dir.iterdir():
-                          if category_dir.is_dir() and not category_dir.name.startswith('.'):
-                              category = category_dir.name
-                              print(f'  📂 Category: {category}')
+                      # Handle nested structure (skills/analysis/code/skill-name)
+                      for subcategory_dir in skills_dir.iterdir():
+                          if subcategory_dir.is_dir() and not subcategory_dir.name.startswith('.'):
+                              subcategory = subcategory_dir.name
                               
-                              for skill_dir in category_dir.iterdir():
-                                  if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
-                                      skill_name = skill_dir.name
-                                      if validator.validate_skill_template(skill_dir, category, skill_name):
-                                          validator.validate_readme(skill_dir, category, skill_name)
+                              # Check if this is a nested structure (contains multiple skills)
+                              has_nested = False
+                              for potential_subdir in subcategory_dir.iterdir():
+                                  if potential_subdir.is_dir() and not potential_subdir.name.startswith('.'):
+                                      # Check if this subdirectory contains multiple skill directories
+                                      skill_count = 0
+                                      for item in potential_subdir.iterdir():
+                                          if item.is_dir() and (item / 'SKILL.md').exists():
+                                              skill_count += 1
+                                      
+                                      if skill_count >= 1:
+                                          # This looks like skills/analysis/code/skill-name structure
+                                          has_nested = True
+                                          nested_category = potential_subdir.name
+                                          category_path = f"{subcategory}/{nested_category}"
+                                          print(f'  📂 Category: {category_path}')
+                                          
+                                          for skill_dir in potential_subdir.iterdir():
+                                              if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
+                                                  skill_name = skill_dir.name
+                                                  # Only validate if this is actually a skill directory (has SKILL.md)
+                                                  if (skill_dir / 'SKILL.md').exists():
+                                                      if validator.validate_skill_template(skill_dir, category_path, skill_name):
+                                                          validator.validate_readme(skill_dir, category_path, skill_name)
+                                          break
+                              
+                              if not has_nested:
+                                  # This is skills/category/skill-name structure
+                                  category = subcategory
+                                  print(f'  📂 Category: {category}')
+                                  
+                                  for skill_dir in subcategory_dir.iterdir():
+                                      if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
+                                          skill_name = skill_dir.name
+                                          # Only validate if this is actually a skill directory (has SKILL.md)
+                                          if (skill_dir / 'SKILL.md').exists():
+                                              if validator.validate_skill_template(skill_dir, category, skill_name):
+                                                  validator.validate_readme(skill_dir, category, skill_name)
               
               # Generate report and return status
               return validator.generate_report()
