@@ -231,9 +231,7 @@ jobs:
             - ⚡ Token efficiency mentions
             - 📖 Documentation quality
             
-            **Status**: ${{
-              '${{ job.status }}' === 'success' ? '✅ PASSED' : '❌ FAILED'
-            }}
+            **Status**: ${{ job.status == 'success' && '✅ PASSED' || '❌ FAILED' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed results.
             

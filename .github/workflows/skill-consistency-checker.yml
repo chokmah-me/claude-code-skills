@@ -386,9 +386,7 @@ if __name__ == '__main__':
             - 🔗 Dependency analysis
             - 📊 Cross-skill compatibility
             
-            **Status**: ${{
-              '${{ job.status }}' === 'success' ? '✅ CONSISTENT' : '⚠️  INCONSISTENCIES FOUND'
-            }}
+            **Status**: ${{ job.status == 'success' && '✅ CONSISTENT' || '⚠️  INCONSISTENCIES FOUND' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed analysis.
             

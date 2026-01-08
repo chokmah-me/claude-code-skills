@@ -268,9 +268,7 @@ jobs:
             - Added latest skill information
             - Updated timestamps and statistics
             
-            **Status**: ${{
-              '${{ job.status }}' === 'success' ? '✅ COMPLETED' : '❌ FAILED'
-            }}
+            **Status**: ${{ job.status == 'success' && '✅ COMPLETED' || '❌ FAILED' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed information.
             

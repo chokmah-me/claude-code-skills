@@ -417,10 +417,7 @@ if __name__ == '__main__':
             - 📧 Special links (mailto, tel)
             - ⚓ Anchor links within documents
             
-            **Status**: ${{
-              '${{ job.status }}' === 'success' && !hasBrokenLinks ? '✅ ALL LINKS VALID' : 
-              '${{ job.status }}' === 'success' && hasBrokenLinks ? '⚠️  SOME BROKEN LINKS FOUND' : '❌ VALIDATION FAILED'
-            }}
+            **Status**: ${{ job.status == 'success' && (!hasBrokenLinks && '✅ ALL LINKS VALID' || '⚠️  SOME BROKEN LINKS FOUND') || '❌ VALIDATION FAILED' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed results.
             
