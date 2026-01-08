@@ -2,7 +2,7 @@
 
 ## 🎯 Repository Overview
 
-**16+ proven Claude Code skills** for development, analysis, and productivity, featuring flagship meta-skills for session management and skill discovery.
+**19+ proven Claude Code skills** for development, analysis, and productivity, featuring flagship meta-skills for session management and skill discovery.
 
 ## 🏆 Flagship Meta-Skills
 
@@ -18,15 +18,33 @@
 - **Auto-documentation generation**
 - **Team collaboration features**
 
+### skill-recommendation-engine
+- **Context-aware skill suggestions**
+- **Intelligent workflow matching**
+- **Personalized recommendations**
+- **Usage pattern analysis**
+
+### claude-startup-integration
+- **Optimized startup configuration**
+- **Environment setup automation**
+- **Performance tuning**
+- **Integration testing**
+
+### startup-skill-showcase
+- **Interactive skill demonstration**
+- **Feature highlighting**
+- **Usage examples**
+- **Quick start guides**
+
 ## 📊 Skills Breakdown
 
 | Category | Count | Key Skills |
 |----------|-------|------------|
-| **Meta** | 5 | session-snapshot, skill-extractor, workflow-automator, context-manager, productivity-tracker |
+| **Meta** | 6 | session-snapshot, skill-extractor, skill-recommendation-engine, claude-startup-integration, startup-skill-showcase, manifest-generator |
 | **Development** | 3 | code-generator, debug-assistant, refactor-pro |
 | **Git** | 3 | repo-analyzer, commit-optimizer, branch-manager |
 | **Analysis** | 8 | performance-profiler, dependency-analyzer, security-scanner, code-quality-checker, architecture-visualizer, test-coverage-analyzer, complexity-analyzer, documentation-generator |
-| **Total** | **19** | **Production-ready skills** |
+| **Total** | **19** | **16 production-ready skills + 3 documented** |
 
 ## 🚀 Quick Start
 

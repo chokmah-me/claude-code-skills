@@ -51,133 +51,133 @@ class SkillInstaller:
                 "description": "Meta-skills for workflow management and automation",
                 "skills": {
                     "session-snapshot": {
-                        "file": "skills/meta/session-snapshot.md",
+                        "file": "skills/meta/session-snapshot/SKILL.md",
                         "description": "Complete session context management",
                         "priority": "high",
                         "dependencies": []
                     },
                     "skill-extractor": {
-                        "file": "skills/meta/skill-extractor.md", 
+                        "file": "skills/meta/skill-extractor/SKILL.md", 
                         "description": "Automated skill discovery and documentation",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "workflow-automator": {
-                        "file": "skills/meta/workflow-automator.md",
-                        "description": "Multi-step process automation",
+                    "skill-recommendation-engine": {
+                        "file": "skills/meta/skill-recommendation-engine/SKILL.md",
+                        "description": "Context-aware skill recommendations",
                         "priority": "medium",
-                        "dependencies": ["session-snapshot"]
+                        "dependencies": ["skill-extractor"]
                     },
-                    "context-manager": {
-                        "file": "skills/meta/context-manager.md",
-                        "description": "Intelligent context switching",
+                    "claude-startup-integration": {
+                        "file": "skills/meta/claude-startup-integration/SKILL.md",
+                        "description": "Startup configuration and optimization",
                         "priority": "medium", 
                         "dependencies": []
                     },
-                    "productivity-tracker": {
-                        "file": "skills/meta/productivity-tracker.md",
-                        "description": "Development efficiency monitoring",
+                    "startup-skill-showcase": {
+                        "file": "skills/meta/startup-skill-showcase/SKILL.md",
+                        "description": "Interactive skill demonstration and showcase",
+                        "priority": "medium",
+                        "dependencies": []
+                    },
+                    "manifest-generator": {
+                        "file": "skills/meta/manifest-generator/SKILL.md",
+                        "description": "Generate and manage skill manifests",
                         "priority": "low",
-                        "dependencies": ["session-snapshot"]
+                        "dependencies": []
                     }
                 }
             },
             "development": {
                 "description": "Core development and coding skills",
                 "skills": {
-                    "code-generator": {
-                        "file": "skills/development/code-generator.md",
-                        "description": "Intelligent code generation with best practices",
+                    "lean-plan": {
+                        "file": "skills/development/lean-plan/SKILL.md",
+                        "description": "Token-efficient planning mode for complex tasks",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "debug-assistant": {
-                        "file": "skills/development/debug-assistant.md",
-                        "description": "Advanced debugging and error analysis",
+                    "quick-test-runner": {
+                        "file": "skills/development/quick-test-runner/SKILL.md",
+                        "description": "Fast test execution and validation workflows",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "refactor-pro": {
-                        "file": "skills/development/refactor-pro.md",
-                        "description": "Safe code refactoring with impact analysis",
+                    "refactoring": {
+                        "file": "skills/development/refactoring/SKILL.md",
+                        "description": "Code restructuring and modernization workflows",
                         "priority": "medium",
-                        "dependencies": ["debug-assistant"]
+                        "dependencies": []
                     }
                 }
             },
             "git": {
                 "description": "Git and version control utilities",
                 "skills": {
-                    "repo-analyzer": {
-                        "file": "skills/git/repo-analyzer.md",
-                        "description": "Repository health and quality assessment",
+                    "diff-summariser": {
+                        "file": "skills/git/diff-summariser/SKILL.md",
+                        "description": "Summarize git diffs for code review",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "commit-optimizer": {
-                        "file": "skills/git/commit-optimizer.md",
-                        "description": "Intelligent commit message generation",
+                    "migrate-repo": {
+                        "file": "skills/git/migrate-repo/SKILL.md",
+                        "description": "Transfer repositories between accounts/orgs",
                         "priority": "medium",
                         "dependencies": []
                     },
-                    "branch-manager": {
-                        "file": "skills/git/branch-manager.md",
-                        "description": "Advanced branching strategy management",
+                    "repo-briefing": {
+                        "file": "skills/git/repo-briefing/SKILL.md",
+                        "description": "Generate compact repository summaries",
                         "priority": "medium",
-                        "dependencies": ["repo-analyzer"]
+                        "dependencies": []
                     }
                 }
             },
             "analysis": {
                 "description": "Code analysis and debugging tools",
                 "skills": {
-                    "performance-profiler": {
-                        "file": "skills/analysis/performance-profiler.md",
-                        "description": "Code performance optimization",
+                    "api-contract-sniffer": {
+                        "file": "skills/analysis/code/api-contract-sniffer/SKILL.md",
+                        "description": "Detect API contract violations and inconsistencies",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "dependency-analyzer": {
-                        "file": "skills/analysis/dependency-analyzer.md",
-                        "description": "Dependency vulnerability scanning",
+                    "dead-code-hunter": {
+                        "file": "skills/analysis/code/dead-code-hunter/SKILL.md",
+                        "description": "Find unused functions, imports, and dead code",
                         "priority": "high",
                         "dependencies": []
                     },
-                    "security-scanner": {
-                        "file": "skills/analysis/security-scanner.md",
-                        "description": "Security issue detection",
+                    "dependency-audit": {
+                        "file": "skills/analysis/code/dependency-audit/SKILL.md",
+                        "description": "Check for outdated and vulnerable dependencies",
                         "priority": "high",
-                        "dependencies": ["dependency-analyzer"]
+                        "dependencies": []
                     },
-                    "code-quality-checker": {
-                        "file": "skills/analysis/code-quality-checker.md",
-                        "description": "Code quality assessment",
+                    "anti-pattern-sniffer": {
+                        "file": "skills/analysis/formal/anti-pattern-sniffer/SKILL.md",
+                        "description": "Detect proof anti-patterns in formal verification",
                         "priority": "medium",
                         "dependencies": []
                     },
-                    "architecture-visualizer": {
-                        "file": "skills/analysis/architecture-visualizer.md",
-                        "description": "System architecture mapping",
+                    "lemma-dependency-graph": {
+                        "file": "skills/analysis/formal/lemma-dependency-graph/SKILL.md",
+                        "description": "Visualize proof dependencies and relationships",
                         "priority": "medium",
                         "dependencies": []
                     },
-                    "test-coverage-analyzer": {
-                        "file": "skills/analysis/test-coverage-analyzer.md",
-                        "description": "Test coverage optimization",
+                    "proof-obligations-snapshot": {
+                        "file": "skills/analysis/formal/proof-obligations-snapshot/SKILL.md",
+                        "description": "Track unproven obligations in formal systems",
                         "priority": "medium",
                         "dependencies": []
                     },
-                    "complexity-analyzer": {
-                        "file": "skills/analysis/complexity-analyzer.md",
-                        "description": "Code complexity measurement",
+                    "tactic-usage-count": {
+                        "file": "skills/analysis/formal/tactic-usage-count/SKILL.md",
+                        "description": "Analyze proof tactics usage patterns",
                         "priority": "low",
                         "dependencies": []
-                    },
-                    "documentation-generator": {
-                        "file": "skills/analysis/documentation-generator.md",
-                        "description": "Automated documentation creation",
-                        "priority": "low",
-                        "dependencies": ["code-quality-checker"]
                     }
                 }
             }

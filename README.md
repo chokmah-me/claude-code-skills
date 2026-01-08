@@ -25,7 +25,12 @@ Hierarchical organization of reusable Claude Code workflows and procedures.
 │   ├── migrate-repo/
 │   └── repo-briefing/
 └── meta/                 # Self-improvement and skill management
-    └── skill-extractor/  # Extract workflows from sessions → new skills
+    ├── claude-startup-integration/  # Startup configuration and setup
+    ├── manifest-generator/          # Generate skill manifests
+    ├── session-snapshot/            # Save and resume session state
+    ├── skill-extractor/             # Extract workflows from sessions → new skills
+    ├── skill-recommendation-engine/ # Recommend skills based on context
+    └── startup-skill-showcase/      # Showcase available skills
 ```
 
 ## Categories
@@ -62,7 +67,12 @@ Hierarchical organization of reusable Claude Code workflows and procedures.
 ### meta ⭐
 **Purpose**: Skills that improve the skills system itself
 
+- `claude-startup-integration` - Configure and optimize Claude Code startup
+- `manifest-generator` - Generate and manage skill manifests
+- `session-snapshot` - Save and resume complete session state
 - `skill-extractor` - **NEW!** Analyze sessions to create new skills from recurring workflows
+- `skill-recommendation-engine` - Recommend relevant skills based on context
+- `startup-skill-showcase` - Display and demonstrate available skills
 
 ## Using Skills
 
@@ -151,4 +161,4 @@ When you discover a useful workflow:
 
 ---
 
-**Last updated**: 2026-01-07 (hierarchical reorganization)
+**Last updated**: 2026-01-07 (Updated with complete meta skills inventory)
