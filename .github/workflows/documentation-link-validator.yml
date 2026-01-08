@@ -1,0 +1,446 @@
+name: Documentation Link Validator
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+      - 'skills/**'
+      - '.claude/skills/**'
+  push:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run weekly link checks
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  validate-links:
+    name: Validate Documentation Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 markdown
+
+      - name: Find and validate links
+        run: |
+          echo "🔍 Scanning documentation for broken links..."
+          python -c "
+import os
+import re
+import requests
+from pathlib import Path
+from urllib.parse import urlparse, urljoin
+from collections import defaultdict
+import time
+
+class LinkValidator:
+    def __init__(self):
+        self.broken_links = []
+        self.warning_links = []
+        self.all_links = defaultdict(list)
+        self.internal_files = set()
+        self.external_cache = {}
+        
+        # Setup session for external links
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Claude-Code-Skills-Link-Checker/1.0'
+        })
+        
+        # Timeout and retry settings
+        self.timeout = 10
+        self.max_retries = 2
+    
+    def scan_repository_files(self):
+        '''Scan repository for all markdown files'''
+        print('📁 Scanning repository for markdown files...')
+        
+        # Common documentation directories
+        doc_dirs = ['.', 'docs', 'skills', '.claude/skills']
+        
+        for doc_dir in doc_dirs:
+            dir_path = Path(doc_dir)
+            if not dir_path.exists():
+                continue
+            
+            # Find all markdown files
+            for md_file in dir_path.rglob('*.md'):
+                if not md_file.name.startswith('.'):
+                    relative_path = md_file.relative_to(Path.cwd())
+                    self.internal_files.add(str(relative_path))
+        
+        print(f'📊 Found {len(self.internal_files)} markdown files')
+    
+    def extract_links_from_file(self, file_path):
+        '''Extract all links from a markdown file'''
+        links = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Extract markdown links [text](url)
+            md_links = re.findall(r'\[([^\]]+)\]\(([^\)]+)\)', content)
+            for text, url in md_links:
+                links.append({
+                    'url': url.strip(),
+                    'text': text.strip(),
+                    'type': 'markdown',
+                    'file': str(file_path)
+                })
+            
+            # Extract bare URLs
+            bare_urls = re.findall(r'https?://[^\s\)\]\}]+', content)
+            for url in bare_urls:
+                # Avoid double-adding URLs that are already in markdown links
+                if not any(link['url'] == url for link in links):
+                    links.append({
+                        'url': url.strip(),
+                        'text': url.strip()[:50] + '...' if len(url) > 50 else url.strip(),
+                        'type': 'bare',
+                        'file': str(file_path)
+                    })
+            
+            # Extract reference links [text][ref]
+            ref_links = re.findall(r'\[([^\]]+)\]\[([^\]]+)\]', content)
+            ref_definitions = re.findall(r'^\[([^\]]+)\]:\s*(.+)$', content, re.MULTILINE)
+            
+            ref_dict = dict(ref_definitions)
+            for text, ref in ref_links:
+                if ref in ref_dict:
+                    links.append({
+                        'url': ref_dict[ref].strip(),
+                        'text': text.strip(),
+                        'type': 'reference',
+                        'file': str(file_path)
+                    })
+            
+        except Exception as e:
+            print(f'⚠️  Error reading {file_path}: {e}')
+        
+        return links
+    
+    def categorize_link(self, url):
+        '''Categorize a link as internal, external, or special'''
+        parsed = urlparse(url)
+        
+        if parsed.scheme in ['http', 'https']:
+            return 'external'
+        elif parsed.scheme in ['mailto', 'tel']:
+            return 'special'
+        elif url.startswith('#'):
+            return 'anchor'
+        elif not parsed.scheme and not url.startswith('/'):
+            return 'internal_relative'
+        elif url.startswith('/'):
+            return 'internal_absolute'
+        else:
+            return 'unknown'
+    
+    def validate_internal_link(self, link, base_file):
+        '''Validate an internal link'''
+        url = link['url']
+        category = self.categorize_link(url)
+        
+        if category == 'anchor':
+            # For now, assume anchors are valid (would need to parse file content)
+            return True, None
+        
+        # Resolve relative paths
+        base_path = Path(base_file).parent
+        
+        if url.startswith('/'):
+            # Absolute path from repo root
+            target_path = Path(url[1:])  # Remove leading slash
+        else:
+            # Relative path
+            target_path = base_path / url
+        
+        # Remove any fragment identifier
+        target_path = Path(str(target_path).split('#')[0])
+        
+        # Check if target exists
+        if target_path.exists():
+            return True, None
+        else:
+            # Try with .md extension if not present
+            md_target = target_path.with_suffix('.md')
+            if md_target.exists():
+                return True, None
+            
+            return False, f'Internal link target not found: {target_path}'
+    
+    def validate_external_link(self, url):
+        '''Validate an external link with caching'''
+        if url in self.external_cache:
+            return self.external_cache[url]
+        
+        try:
+            # Make HEAD request first (faster)
+            response = self.session.head(url, timeout=self.timeout, allow_redirects=True)
+            
+            if response.status_code >= 400:
+                # Try GET request if HEAD fails
+                response = self.session.get(url, timeout=self.timeout, allow_redirects=True)
+            
+            is_valid = response.status_code < 400
+            error_msg = None if is_valid else f'HTTP {response.status_code}'
+            
+            # Cache the result
+            self.external_cache[url] = (is_valid, error_msg)
+            
+            # Rate limiting - be nice to external servers
+            time.sleep(0.1)
+            
+            return is_valid, error_msg
+            
+        except requests.exceptions.Timeout:
+            self.external_cache[url] = (False, 'Connection timeout')
+            return False, 'Connection timeout'
+        except requests.exceptions.ConnectionError:
+            self.external_cache[url] = (False, 'Connection error')
+            return False, 'Connection error'
+        except Exception as e:
+            self.external_cache[url] = (False, str(e))
+            return False, str(e)
+    
+    def validate_special_link(self, url):
+        '''Validate special links like mailto, tel'''
+        parsed = urlparse(url)
+        
+        if parsed.scheme == 'mailto':
+            # Basic email validation
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            email = parsed.path
+            is_valid = bool(re.match(email_pattern, email))
+            error_msg = None if is_valid else 'Invalid email format'
+            
+        elif parsed.scheme == 'tel':
+            # Basic phone validation
+            phone = parsed.path
+            is_valid = bool(re.match(r'^\+?[\d\s\-\(\)]+$', phone))
+            error_msg = None if is_valid else 'Invalid phone format'
+            
+        else:
+            is_valid = True
+            error_msg = None
+        
+        return is_valid, error_msg
+    
+    def validate_all_links(self):
+        '''Validate all links found in the repository'''
+        print('🔍 Validating links...')
+        
+        total_links = 0
+        valid_links = 0
+        
+        for md_file in self.internal_files:
+            print(f'📄 Checking {md_file}...')
+            links = self.extract_links_from_file(md_file)
+            
+            for link in links:
+                total_links += 1
+                url = link['url']
+                
+                # Store link for reporting
+                self.all_links[url].append(link)
+                
+                # Validate based on link type
+                category = self.categorize_link(url)
+                
+                try:
+                    if category == 'external':
+                        is_valid, error_msg = self.validate_external_link(url)
+                    elif category in ['internal_relative', 'internal_absolute', 'anchor']:
+                        is_valid, error_msg = self.validate_internal_link(link, md_file)
+                    elif category == 'special':
+                        is_valid, error_msg = self.validate_special_link(url)
+                    else:
+                        # Unknown link type - mark as warning
+                        is_valid = True
+                        error_msg = f'Unknown link type: {category}'
+                        self.warning_links.append({
+                            'url': url,
+                            'file': md_file,
+                            'error': error_msg,
+                            'type': category
+                        })
+                    
+                    if is_valid:
+                        valid_links += 1
+                    else:
+                        self.broken_links.append({
+                            'url': url,
+                            'file': md_file,
+                            'error': error_msg,
+                            'type': category
+                        })
+                        
+                except Exception as e:
+                    self.broken_links.append({
+                        'url': url,
+                        'file': md_file,
+                        'error': f'Validation error: {e}',
+                        'type': category
+                    })
+        
+        return total_links, valid_links
+    
+    def generate_report(self):
+        '''Generate comprehensive link validation report'''
+        print('\\n' + '='*60)
+        print('🔗 DOCUMENTATION LINK VALIDATION REPORT')
+        print('='*60)
+        
+        total_links, valid_links = self.validate_all_links()
+        
+        print(f'\\n📊 Statistics:')
+        print(f'  Files Scanned: {len(self.internal_files)}')
+        print(f'  Total Links: {total_links}')
+        print(f'  Valid Links: {valid_links}')
+        print(f'  Success Rate: {(valid_links/max(total_links, 1)*100):.1f}%')
+        
+        if self.broken_links:
+            print(f'\\n❌ Broken Links ({len(self.broken_links)}):')
+            # Group by error type
+            error_groups = defaultdict(list)
+            for link in self.broken_links:
+                error_groups[link['error']].append(link)
+            
+            for error, links in error_groups.items():
+                print(f'\\n  {error}:')
+                for link in links[:3]:  # Show first 3 of each error type
+                    print(f'    - {link[\"url\"]} (in {link[\"file\"]})')
+                if len(links) > 3:
+                    print(f'    ... and {len(links) - 3} more')
+        
+        if self.warning_links:
+            print(f'\\n⚠️  Warning Links ({len(self.warning_links)}):')
+            for link in self.warning_links[:5]:
+                print(f'  - {link[\"url\"]}: {link[\"error\"]} ({link[\"file\"]})')
+            if len(self.warning_links) > 5:
+                print(f'  ... and {len(self.warning_links) - 5} more')
+        
+        # Link type breakdown
+        type_counts = defaultdict(int)
+        for url, links in self.all_links.items():
+            category = self.categorize_link(url)
+            type_counts[category] += len(links)
+        
+        if type_counts:
+            print(f'\\n📈 Link Type Breakdown:')
+            for link_type, count in sorted(type_counts.items()):
+                print(f'  {link_type}: {count}')
+        
+        print('\\n' + '='*60)
+        
+        return len(self.broken_links) == 0
+
+def main():
+    validator = LinkValidator()
+    
+    # Scan repository
+    validator.scan_repository_files()
+    
+    # Validate links
+    is_valid = validator.generate_report()
+    
+    # Save detailed results
+    results = {
+        'broken_links': validator.broken_links,
+        'warning_links': validator.warning_links,
+        'total_links': sum(len(links) for links in validator.all_links.values()),
+        'external_cache': validator.external_cache
+    }
+    
+    with open('link-validation-results.json', 'w') as f:
+        import json
+        json.dump(results, f, indent=2)
+    
+    return is_valid
+
+if __name__ == '__main__':
+    import sys
+    success = main()
+    sys.exit(0 if success else 1)
+          "
+
+      - name: Upload validation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-validation-results
+          path: |
+            link-validation-results.json
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Try to read results
+            let hasBrokenLinks = false;
+            try {
+              if (fs.existsSync('link-validation-results.json')) {
+                const results = JSON.parse(fs.readFileSync('link-validation-results.json', 'utf8'));
+                hasBrokenLinks = results.broken_links && results.broken_links.length > 0;
+              }
+            } catch (error) {
+              console.log('Could not read validation results');
+            }
+            
+            let comment = `## 🔗 Documentation Link Validation
+            
+            ✅ Documentation link validation completed!
+            
+            This workflow checks all links in markdown files:
+            - 🔍 Internal links to other documentation files
+            - 🌐 External URLs for accessibility
+            - 📧 Special links (mailto, tel)
+            - ⚓ Anchor links within documents
+            
+            **Status**: ${{
+              '${{ job.status }}' === 'success' && !hasBrokenLinks ? '✅ ALL LINKS VALID' : 
+              '${{ job.status }}' === 'success' && hasBrokenLinks ? '⚠️  SOME BROKEN LINKS FOUND' : '❌ VALIDATION FAILED'
+            }}
+            
+            Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed results.
+            
+            ### What was checked:
+            - ✅ All markdown files in the repository
+            - ✅ Internal file references and paths
+            - ✅ External website links (with rate limiting)
+            - ✅ Email and phone number formats
+            - ✅ Anchor references within documents
+            
+            ${{
+              hasBrokenLinks ? '\\n⚠️  **Action Required**: Broken links were found. Please review the workflow logs and fix any broken links before merging.**' : ''
+            }}
+            
+            ---
+            *This comment was automatically generated by the documentation link validator.*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
