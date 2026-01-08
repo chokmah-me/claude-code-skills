@@ -39,180 +39,184 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
-      - name: Update README with skill inventory
+      - name: Create README update script
         run: |
-          echo "📋 Updating README with skill inventory..."
-          python -c "
-import json
-import re
-from pathlib import Path
-from datetime import datetime
+          cat > update_readme.py << 'EOF'
+          import json
+          import re
+          from pathlib import Path
+          from datetime import datetime
+          
+          class ReadmeUpdater:
+              def __init__(self):
+                  self.skills_inventory = {}
+                  self.stats = {
+                      'total_skills': 0,
+                      'categories': 0,
+                      'skills_with_readme': 0
+                  }
+              
+              def scan_skills(self):
+                  '''Scan for skills in the repository'''
+                  skill_locations = [
+                      ('skills', 'skills'),
+                      ('.claude/skills', '.claude/skills')
+                  ]
+                  
+                  for base_path, display_name in skill_locations:
+                      skills_dir = Path(base_path)
+                      if skills_dir.exists():
+                          print(f'📁 Scanning {display_name} directory...')
+                          
+                          for category_dir in skills_dir.iterdir():
+                              if category_dir.is_dir() and not category_dir.name.startswith('.'):
+                                  category = category_dir.name
+                                  if category not in self.skills_inventory:
+                                      self.skills_inventory[category] = []
+                                  
+                                  print(f'  📂 Found category: {category}')
+                                  
+                                  for skill_dir in category_dir.iterdir():
+                                      if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
+                                          skill_name = skill_dir.name
+                                          skill_info = self.analyze_skill(skill_dir, category, skill_name)
+                                          self.skills_inventory[category].append(skill_info)
+                                          self.stats['total_skills'] += 1
+                                          
+                                          if skill_info['has_readme']:
+                                              self.stats['skills_with_readme'] += 1
+                  
+                  self.stats['categories'] = len(self.skills_inventory)
+                  print(f'📊 Found {self.stats["total_skills"]} skills across {self.stats["categories"]} categories')
+              
+              def analyze_skill(self, skill_path, category, skill_name):
+                  '''Analyze a single skill'''
+                  skill_file = skill_path / 'SKILL.md'
+                  readme_file = skill_path / 'README.md'
+                  
+                  info = {
+                      'name': skill_name,
+                      'category': category,
+                      'has_readme': readme_file.exists(),
+                      'has_skill_md': skill_file.exists(),
+                      'description': '',
+                      'purpose': ''
+                  }
+                  
+                  # Extract description from SKILL.md
+                  if skill_file.exists():
+                      try:
+                          with open(skill_file, 'r', encoding='utf-8') as f:
+                              content = f.read()
+                          
+                          # Look for purpose or description
+                          purpose_match = re.search(r'Purpose:(.*?)(?:\n|$)', content, re.IGNORECASE)
+                          if purpose_match:
+                              info['purpose'] = purpose_match.group(1).strip()
+                          
+                          # Look for first sentence as description
+                          lines = content.split('\n')
+                          for line in lines:
+                              line = line.strip()
+                              if line and not line.startswith('#') and not line.startswith('---'):
+                                  info['description'] = line[:100] + '...' if len(line) > 100 else line
+                                  break
+                                  
+                      except Exception as e:
+                          print(f'⚠️  Error reading {skill_file}: {e}')
+                  
+                  return info
+              
+              def generate_inventory_markdown(self):
+                  '''Generate markdown for skills inventory'''
+                  markdown = f'\n## 📋 Skills Inventory\n\n'
+                  markdown += f'*Last updated: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}*\n\n'
+                  markdown += f'**Total Skills:** {self.stats["total_skills"]}  \n'
+                  markdown += f'**Categories:** {self.stats["categories"]}  \n'
+                  markdown += f'**Skills with README:** {self.stats["skills_with_readme"]}  \n\n'
+                  
+                  if not self.skills_inventory:
+                      markdown += 'No skills found in repository.\n'
+                      return markdown
+                  
+                  # Sort categories alphabetically
+                  for category in sorted(self.skills_inventory.keys()):
+                      skills = self.skills_inventory[category]
+                      if skills:
+                          markdown += f'### {category.title()} ({len(skills)} skills)\n\n'
+                          
+                          # Sort skills alphabetically
+                          for skill in sorted(skills, key=lambda x: x['name']):
+                              skill_path = f'{category}/{skill["name"]}'
+                              readme_link = f'[README](skills/{skill_path}/README.md)' if skill['has_readme'] else 'No README'
+                              
+                              markdown += f'#### {skill["name"].replace("-", " ").title()}\n'
+                              if skill['description']:
+                                  markdown += f'{skill["description"]}\n\n'
+                              if skill['purpose']:
+                                  markdown += f'**Purpose:** {skill["purpose"]}\n\n'
+                              markdown += f'**Location:** `skills/{skill_path}/`  \n'
+                              markdown += f'**Documentation:** {readme_link}  \n\n'
+                  
+                  return markdown
+              
+              def update_readme(self):
+                  '''Update README.md with skills inventory'''
+                  readme_path = Path('README.md')
+                  if not readme_path.exists():
+                      print('❌ README.md not found')
+                      return False
+                  
+                  try:
+                      with open(readme_path, 'r', encoding='utf-8') as f:
+                          content = f.read()
+                      
+                      # Find skills inventory markers
+                      start_marker = '<!-- SKILLS_INVENTORY_START -->'
+                      end_marker = '<!-- SKILLS_INVENTORY_END -->'
+                      
+                      if start_marker not in content or end_marker not in content:
+                          print('❌ Skills inventory markers not found in README.md')
+                          print('Please add these markers to your README.md:')
+                          print(f'{start_marker}')
+                          print(f'{end_marker}')
+                          return False
+                      
+                      # Generate new inventory
+                      self.scan_skills()
+                      inventory_markdown = self.generate_inventory_markdown()
+                      
+                      # Replace content between markers
+                      start_idx = content.find(start_marker) + len(start_marker)
+                      end_idx = content.find(end_marker)
+                      
+                      new_content = (
+                          content[:start_idx] +
+                          '\n' + inventory_markdown.strip() + '\n' +
+                          content[end_idx:]
+                      )
+                      
+                      # Write updated README
+                      with open(readme_path, 'w', encoding='utf-8') as f:
+                          f.write(new_content)
+                      
+                      print('✅ README.md updated successfully')
+                      return True
+                      
+                  except Exception as e:
+                      print(f'❌ Error updating README.md: {e}')
+                      return False
+          
+          # Run the updater
+          updater = ReadmeUpdater()
+          success = updater.update_readme()
+          exit(0 if success else 1)
+          EOF
 
-class ReadmeUpdater:
-    def __init__(self):
-        self.skills_inventory = {}
-        self.stats = {
-            'total_skills': 0,
-            'categories': 0,
-            'skills_with_readme': 0
-        }
-    
-    def scan_skills(self):
-        '''Scan for skills in the repository'''
-        skill_locations = [
-            ('skills', 'skills'),
-            ('.claude/skills', '.claude/skills')
-        ]
-        
-        for base_path, display_name in skill_locations:
-            skills_dir = Path(base_path)
-            if skills_dir.exists():
-                print(f'📁 Scanning {display_name} directory...')
-                
-                for category_dir in skills_dir.iterdir():
-                    if category_dir.is_dir() and not category_dir.name.startswith('.'):
-                        category = category_dir.name
-                        if category not in self.skills_inventory:
-                            self.skills_inventory[category] = []
-                        
-                        print(f'  📂 Found category: {category}')
-                        
-                        for skill_dir in category_dir.iterdir():
-                            if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
-                                skill_name = skill_dir.name
-                                skill_info = self.analyze_skill(skill_dir, category, skill_name)
-                                self.skills_inventory[category].append(skill_info)
-                                self.stats['total_skills'] += 1
-                                
-                                if skill_info['has_readme']:
-                                    self.stats['skills_with_readme'] += 1
-        
-        self.stats['categories'] = len(self.skills_inventory)
-        print(f'📊 Found {self.stats[\"total_skills\"]} skills across {self.stats[\"categories\"]} categories')
-    
-    def analyze_skill(self, skill_path, category, skill_name):
-        '''Analyze a single skill'''
-        skill_file = skill_path / 'SKILL.md'
-        readme_file = skill_path / 'README.md'
-        
-        info = {
-            'name': skill_name,
-            'category': category,
-            'has_readme': readme_file.exists(),
-            'has_skill_md': skill_file.exists(),
-            'description': '',
-            'purpose': ''
-        }
-        
-        # Extract description from SKILL.md
-        if skill_file.exists():
-            try:
-                with open(skill_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Look for purpose or description
-                purpose_match = re.search(r'Purpose:(.*?)(?:\n|$)', content, re.IGNORECASE)
-                if purpose_match:
-                    info['purpose'] = purpose_match.group(1).strip()
-                
-                # Look for first sentence as description
-                lines = content.split('\n')
-                for line in lines:
-                    line = line.strip()
-                    if line and not line.startswith('#') and not line.startswith('---'):
-                        info['description'] = line[:100] + '...' if len(line) > 100 else line
-                        break
-                        
-            except Exception as e:
-                print(f'⚠️  Error reading {skill_file}: {e}')
-        
-        return info
-    
-    def generate_inventory_markdown(self):
-        '''Generate markdown for skills inventory'''
-        markdown = f'\n## 📋 Skills Inventory\n\n'
-        markdown += f'*Last updated: {datetime.now().strftime(\"%Y-%m-%d %H:%M UTC\")}*\n\n'
-        markdown += f'**Total Skills:** {self.stats[\"total_skills\"]}  \n'
-        markdown += f'**Categories:** {self.stats[\"categories\"]}  \n'
-        markdown += f'**Skills with README:** {self.stats[\"skills_with_readme\"]}  \n\n'
-        
-        if not self.skills_inventory:
-            markdown += 'No skills found in repository.\n'
-            return markdown
-        
-        # Sort categories alphabetically
-        for category in sorted(self.skills_inventory.keys()):
-            skills = self.skills_inventory[category]
-            if skills:
-                markdown += f'### {category.title()} ({len(skills)} skills)\n\n'
-                
-                # Sort skills alphabetically
-                for skill in sorted(skills, key=lambda x: x['name']):
-                    skill_path = f'{category}/{skill[\"name\"]}'
-                    readme_link = f'[README](skills/{skill_path}/README.md)' if skill['has_readme'] else 'No README'
-                    
-                    markdown += f'#### {skill["name"].replace(\"-\", \" \").title()}\n'
-                    if skill['description']:
-                        markdown += f'{skill[\"description\"]}\n\n'
-                    if skill['purpose']:
-                        markdown += f'**Purpose:** {skill[\"purpose\"]}\n\n'
-                    markdown += f'**Location:** `skills/{skill_path}/`  \n'
-                    markdown += f'**Documentation:** {readme_link}  \n\n'
-        
-        return markdown
-    
-    def update_readme(self):
-        '''Update README.md with skills inventory'''
-        readme_path = Path('README.md')
-        if not readme_path.exists():
-            print('❌ README.md not found')
-            return False
-        
-        try:
-            with open(readme_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            # Find skills inventory markers
-            start_marker = '<!-- SKILLS_INVENTORY_START -->'
-            end_marker = '<!-- SKILLS_INVENTORY_END -->'
-            
-            if start_marker not in content or end_marker not in content:
-                print('❌ Skills inventory markers not found in README.md')
-                print('Please add these markers to your README.md:')
-                print(f'{start_marker}')
-                print(f'{end_marker}')
-                return False
-            
-            # Generate new inventory
-            self.scan_skills()
-            inventory_markdown = self.generate_inventory_markdown()
-            
-            # Replace content between markers
-            start_idx = content.find(start_marker) + len(start_marker)
-            end_idx = content.find(end_marker)
-            
-            new_content = (
-                content[:start_idx] +
-                '\n' + inventory_markdown.strip() + '\n' +
-                content[end_idx:]
-            )
-            
-            # Write updated README
-            with open(readme_path, 'w', encoding='utf-8') as f:
-                f.write(new_content)
-            
-            print('✅ README.md updated successfully')
-            return True
-            
-        except Exception as e:
-            print(f'❌ Error updating README.md: {e}')
-            return False
-
-# Run the updater
-updater = ReadmeUpdater()
-success = updater.update_readme()
-exit(0 if success else 1)
-          "
+      - name: Run README update script
+        run: |
+          echo "📋 Running README update script..."
+          python update_readme.py
 
       - name: Check for changes
         id: changes
