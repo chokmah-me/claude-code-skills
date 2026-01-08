@@ -178,8 +178,19 @@ Describe what output the user can expect.
 
 ### Validation Tools
 
+#### Automated Validation (GitHub Actions)
+Your pull request will be automatically validated by our GitHub Actions workflow:
+- ✅ **Skill Structure**: Validates SKILL.md format and required sections
+- ✅ **Documentation**: Checks for proper Purpose, Usage, and Examples sections
+- ✅ **Token Efficiency**: Ensures skills mention token optimization
+- ✅ **YAML Frontmatter**: Validates metadata structure when present
+- ✅ **Skill Invocation**: Verifies proper skill name references
+
+The validation runs automatically when you create a pull request and will comment with detailed results.
+
+#### Manual Validation
 ```bash
-# Run skill validation
+# Run skill validation locally
 python tests/validate_skills.py --skill your-skill-name
 
 # Test for common issues

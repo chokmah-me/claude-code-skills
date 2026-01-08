@@ -135,6 +135,14 @@ If a skill consistently exceeds 3000 tokens, consider splitting it.
 
 ## Maintenance
 
+### Automated Validation
+This repository uses GitHub Actions to automatically validate skill templates. The workflow:
+- ✅ Runs on every pull request affecting skills
+- ✅ Validates SKILL.md structure and required sections
+- ✅ Checks for proper documentation and examples
+- ✅ Ensures token efficiency considerations
+- ✅ Provides detailed validation reports
+
 ### Old Flat Structure
 The old flat structure still exists in `~/.claude/skills/` root:
 - These are preserved for backward compatibility
@@ -161,7 +169,7 @@ When you discover a useful workflow:
 
 ---
 
-**Last updated**: 2026-01-07 (Updated with complete meta skills inventory)
+**Last updated**: 2026-01-08 (Added GitHub Actions automation for skill template validation)
 
 <!-- SKILLS_INVENTORY_START -->
 ## Available Skills
