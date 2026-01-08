@@ -189,11 +189,11 @@ jobs:
                           if subcategory_dir.is_dir() and not subcategory_dir.name.startswith('.'):
                               subcategory = subcategory_dir.name
                               
-                              # Check if this is a nested structure (contains multiple skills)
-                              has_nested = False
+                              # Process all subdirectories that contain skills (nested structure)
+                              processed_nested = False
                               for potential_subdir in subcategory_dir.iterdir():
                                   if potential_subdir.is_dir() and not potential_subdir.name.startswith('.'):
-                                      # Check if this subdirectory contains multiple skill directories
+                                      # Check if this subdirectory contains skill directories
                                       skill_count = 0
                                       for item in potential_subdir.iterdir():
                                           if item.is_dir() and (item / 'SKILL.md').exists():
@@ -201,7 +201,7 @@ jobs:
                                       
                                       if skill_count >= 1:
                                           # This looks like skills/analysis/code/skill-name structure
-                                          has_nested = True
+                                          processed_nested = True
                                           nested_category = potential_subdir.name
                                           category_path = f"{subcategory}/{nested_category}"
                                           print(f'  📂 Category: {category_path}')
@@ -213,9 +213,9 @@ jobs:
                                                   if (skill_dir / 'SKILL.md').exists():
                                                       if validator.validate_skill_template(skill_dir, category_path, skill_name):
                                                           validator.validate_readme(skill_dir, category_path, skill_name)
-                                          break
                               
-                              if not has_nested:
+                              # If no nested structure was found, treat as flat category
+                              if not processed_nested:
                                   # This is skills/category/skill-name structure
                                   category = subcategory
                                   print(f'  📂 Category: {category}')
