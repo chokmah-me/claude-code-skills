@@ -162,3 +162,8 @@ When you discover a useful workflow:
 ---
 
 **Last updated**: 2026-01-07 (Updated with complete meta skills inventory)
+
+<!-- SKILLS_INVENTORY_START -->
+## Available Skills
+*Skills inventory will be automatically updated by GitHub Actions*
+<!-- SKILLS_INVENTORY_END -->

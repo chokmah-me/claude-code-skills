@@ -1,0 +1,339 @@
+name: Automated Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.2.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        type: boolean
+        default: false
+      draft:
+        description: 'Create as draft release'
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      is-prerelease: ${{ steps.get-version.outputs.is-prerelease }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version info
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            PRERELEASE="${{ github.event.inputs.prerelease }}"
+          else
+            VERSION="${{ github.ref_name }}"
+            PRERELEASE="false"
+          fi
+          
+          # Validate version format
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: v1.2.3"
+            exit 1
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          echo "✅ Version validated: $VERSION"
+
+      - name: Check if tag exists
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "✅ Tag $VERSION exists"
+          else
+            echo "❌ Tag $VERSION does not exist"
+            exit 1
+          fi
+
+      - name: Validate repository structure
+        run: |
+          echo "🔍 Validating repository structure..."
+          
+          # Check main directories exist
+          for dir in skills docs templates tests; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Missing directory: $dir"
+              exit 1
+            fi
+          done
+          
+          # Validate meta skills have documentation
+          META_SKILLS=("claude-startup-integration" "manifest-generator" "session-snapshot" "skill-extractor" "skill-recommendation-engine" "startup-skill-showcase")
+          for skill in "${META_SKILLS[@]}"; do
+            SKILL_DIR="skills/meta/$skill"
+            if [ ! -d "$SKILL_DIR" ]; then
+              echo "❌ Missing meta skill directory: $skill"
+              exit 1
+            fi
+            
+            # Check for required files
+            if [ ! -f "$SKILL_DIR/SKILL.md" ]; then
+              echo "❌ Missing SKILL.md for: $skill"
+              exit 1
+            fi
+            
+            echo "✅ $skill structure validated"
+          done
+          
+          echo "✅ Repository structure validation complete"
+
+  generate-release-notes:
+    name: Generate Release Notes
+    runs-on: ubuntu-latest
+    needs: validate-release
+    outputs:
+      release-notes: ${{ steps.notes.outputs.content }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          echo "📝 Generating release notes for $VERSION..."
+          
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "📊 Comparing $VERSION to $PREV_TAG"
+            CHANGES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
+          else
+            echo "📊 First release - showing all commits"
+            CHANGES=$(git log --pretty=format:"- %s" --max-count=50)
+          fi
+          
+          # Generate structured release notes
+          cat > release_notes.md << 'EOF'
+          ## 🎉 What's New in ${{ needs.validate-release.outputs.version }}
+          
+          ### Changes
+          $CHANGES
+          
+          ### Skills Summary
+          - **Total Skills**: 19+ proven Claude Code skills
+          - **Meta Skills**: 6 comprehensive meta-skills
+          - **Categories**: analysis, development, git, formal verification
+          
+          ### Installation
+          ```bash
+          # Clone the repository
+git clone https://github.com/chokmah-me/claude-code-skills.git
+          
+          # Install skills to Claude Code
+          python install.py
+          ```
+          
+          ### Quick Start
+          ```bash
+          # Use any skill with /<skill-name>
+          /skill-extractor
+          /session-snapshot
+          /lean-plan
+          ```
+          
+          ---
+          **Full Documentation**: https://github.com/chokmah-me/claude-code-skills
+          **Issues & Support**: https://github.com/chokmah-me/claude-code-skills/issues
+          EOF
+          
+          # Set output for next job
+          CONTENT=$(cat release_notes.md)
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "✅ Release notes generated"
+
+  create-release-artifacts:
+    name: Create Release Artifacts
+    runs-on: ubuntu-latest
+    needs: [validate-release, generate-release-notes]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml markdown
+
+      - name: Generate skill inventory
+        run: |
+          echo "📋 Generating skill inventory..."
+          python -c "
+import os
+import yaml
+from pathlib import Path
+
+def generate_inventory():
+    inventory = {'categories': {}, 'total_skills': 0, 'meta_skills': 0}
+    
+    skills_dir = Path('skills')
+    if not skills_dir.exists():
+        return inventory
+        
+    for category_dir in skills_dir.iterdir():
+        if category_dir.is_dir() and category_dir.name != '__pycache__':
+            category = category_dir.name
+            inventory['categories'][category] = {'skills': [], 'count': 0}
+            
+            for skill_dir in category_dir.iterdir():
+                if skill_dir.is_dir() and (skill_dir / 'SKILL.md').exists():
+                    skill_name = skill_dir.name
+                    inventory['categories'][category]['skills'].append(skill_name)
+                    inventory['categories'][category]['count'] += 1
+                    inventory['total_skills'] += 1
+                    
+                    if category == 'meta':
+                        inventory['meta_skills'] += 1
+    
+    # Save inventory
+    with open('skill-inventory.json', 'w') as f:
+        import json
+        json.dump(inventory, f, indent=2)
+    
+    # Generate markdown report
+    with open('SKILL_INVENTORY.md', 'w') as f:
+        f.write('# Claude Code Skills Inventory\n\n')
+        f.write(f'**Total Skills**: {inventory[\"total_skills\"]}\n')
+        f.write(f'**Meta Skills**: {inventory[\"meta_skills\"]}\n\n')
+        
+        for category, data in inventory['categories'].items():
+            f.write(f'## {category.title()} ({data[\"count\"]} skills)\n')
+            for skill in data['skills']:
+                f.write(f'- [{skill}](skills/{category}/{skill}/README.md)\n')
+            f.write('\n')
+    
+    print(f'✅ Generated inventory: {inventory[\"total_skills\"]} total skills')
+
+ generate_inventory()
+          "
+
+      - name: Create distribution package
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          echo "📦 Creating distribution package for $VERSION..."
+          
+          # Create distribution directory
+          mkdir -p dist
+          
+          # Create skills package
+          tar -czf "dist/claude-code-skills-$VERSION.tar.gz" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='dist' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.env' \
+            --exclude='temp-*' \
+            .
+          
+          # Create skills-only package
+          tar -czf "dist/claude-skills-only-$VERSION.tar.gz" \
+            skills/ \
+            install.py \
+            README.md \
+            LICENSE \
+            CONTRIBUTING.md
+          
+          # Generate checksums
+          cd dist
+          sha256sum *.tar.gz > checksums.txt
+          
+          echo "✅ Distribution packages created"
+          ls -la dist/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/
+          retention-days: 30
+
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, generate-release-notes, create-release-artifacts]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-release.outputs.version }}
+          name: ${{ needs.validate-release.outputs.version }} - Complete Documentation
+          body: ${{ needs.generate-release-notes.outputs.release-notes }}
+          prerelease: ${{ needs.validate-release.outputs.is-prerelease }}
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          files: |
+            dist/*.tar.gz
+            dist/checksums.txt
+            SKILL_INVENTORY.md
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update latest tag
+        if: ${{ needs.validate-release.outputs.is-prerelease == 'false' && github.event.inputs.draft != 'true' }}
+        run: |
+          git tag -f latest ${{ needs.validate-release.outputs.version }}
+          git push origin latest --force
+          echo "✅ Updated 'latest' tag"
+
+  notify-completion:
+    name: Notify Completion
+    runs-on: ubuntu-latest
+    needs: [validate-release, publish-release]
+    if: always()
+    steps:
+      - name: Release status notification
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          if [ "${{ needs.publish-release.result }}" = "success" ]; then
+            echo "✅ Release $VERSION published successfully!"
+            echo "📍 Release URL: https://github.com/${{ github.repository }}/releases/tag/$VERSION"
+          else
+            echo "❌ Release $VERSION failed"
+            exit 1
+          fi
