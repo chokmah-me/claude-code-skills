@@ -37,7 +37,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip import json
+          pip install pyyaml
+
+      - name: Update README with skill inventory
+        run: |
+          echo "📋 Updating README with skill inventory..."
+          python -c "
+import json
 import re
 from pathlib import Path
 from datetime import datetime
@@ -82,7 +88,7 @@ class ReadmeUpdater:
                                     self.stats['skills_with_readme'] += 1
         
         self.stats['categories'] = len(self.skills_inventory)
-        print(f'📊 Found {self.stats["total_skills"]} skills across {self.stats["categories"]} categories')
+        print(f'📊 Found {self.stats[\"total_skills\"]} skills across {self.stats[\"categories\"]} categories')
     
     def analyze_skill(self, skill_path, category, skill_name):
         '''Analyze a single skill'''
@@ -122,52 +128,42 @@ class ReadmeUpdater:
         
         return info
     
-    def generate_skills_section(self):
-        '''Generate the skills inventory section for README'''
-        lines = []
-        lines.append('## 🛠️ Available Skills\n')
-        lines.append(f'*Last updated: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}*\n')
+    def generate_inventory_markdown(self):
+        '''Generate markdown for skills inventory'''
+        markdown = f'\n## 📋 Skills Inventory\n\n'
+        markdown += f'*Last updated: {datetime.now().strftime(\"%Y-%m-%d %H:%M UTC\")}*\n\n'
+        markdown += f'**Total Skills:** {self.stats[\"total_skills\"]}  \n'
+        markdown += f'**Categories:** {self.stats[\"categories\"]}  \n'
+        markdown += f'**Skills with README:** {self.stats[\"skills_with_readme\"]}  \n\n'
         
-        # Add statistics
-        lines.append('### 📊 Skills Statistics\n')
-        lines.append(f'- **Total Skills**: {self.stats["total_skills"]}')
-        lines.append(f'- **Categories**: {self.stats["categories"]}')
-        lines.append(f'- **Skills with README**: {self.stats["skills_with_readme"]}')
-        lines.append('')
+        if not self.skills_inventory:
+            markdown += 'No skills found in repository.\n'
+            return markdown
         
-        # Add skills by category
-        for category, skills in sorted(self.skills_inventory.items()):
-            if not skills:
-                continue
+        # Sort categories alphabetically
+        for category in sorted(self.skills_inventory.keys()):
+            skills = self.skills_inventory[category]
+            if skills:
+                markdown += f'### {category.title()} ({len(skills)} skills)\n\n'
                 
-            lines.append(f'### {category.title()}\n')
-            
-            for skill in sorted(skills, key=lambda x: x['name']):
-                skill_line = f'- **{skill["name"].replace("-", " ").title()}**'
-                
-                if skill['has_readme']:
-                    # Link to README if it exists
-                    skill_path = f'skills/{category}/{skill["name"]}'
-                    if Path(f'.claude/skills/{category}/{skill["name"]}').exists():
-                        skill_path = f'.claude/skills/{category}/{skill["name"]}'
+                # Sort skills alphabetically
+                for skill in sorted(skills, key=lambda x: x['name']):
+                    skill_path = f'{category}/{skill[\"name\"]}'
+                    readme_link = f'[README](skills/{skill_path}/README.md)' if skill['has_readme'] else 'No README'
                     
-                    skill_line += f' [`README`]({skill_path}/README.md)'
-                
-                if skill['purpose']:
-                    skill_line += f' - {skill["purpose"]}'
-                elif skill['description']:
-                    skill_line += f' - {skill["description"]}'
-                
-                lines.append(skill_line)
-            
-            lines.append('')
+                    markdown += f'#### {skill["name"].replace(\"-\", \" \").title()}\n'
+                    if skill['description']:
+                        markdown += f'{skill[\"description\"]}\n\n'
+                    if skill['purpose']:
+                        markdown += f'**Purpose:** {skill[\"purpose\"]}\n\n'
+                    markdown += f'**Location:** `skills/{skill_path}/`  \n'
+                    markdown += f'**Documentation:** {readme_link}  \n\n'
         
-        return '\n'.join(lines)
+        return markdown
     
     def update_readme(self):
-        '''Update the README.md file'''
+        '''Update README.md with skills inventory'''
         readme_path = Path('README.md')
-        
         if not readme_path.exists():
             print('❌ README.md not found')
             return False
@@ -176,29 +172,32 @@ class ReadmeUpdater:
             with open(readme_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Find the skills section markers
+            # Find skills inventory markers
             start_marker = '<!-- SKILLS_INVENTORY_START -->'
             end_marker = '<!-- SKILLS_INVENTORY_END -->'
             
             if start_marker not in content or end_marker not in content:
-                print('⚠️  Skills section markers not found in README.md')
-                print('  Add <!-- SKILLS_INVENTORY_START --> and <!-- SKILLS_INVENTORY_END --> to your README')
+                print('❌ Skills inventory markers not found in README.md')
+                print('Please add these markers to your README.md:')
+                print(f'{start_marker}')
+                print(f'{end_marker}')
                 return False
             
-            # Generate new skills section
-            skills_section = self.generate_skills_section()
+            # Generate new inventory
+            self.scan_skills()
+            inventory_markdown = self.generate_inventory_markdown()
             
-            # Replace the section
-            pattern = f'{re.escape(start_marker)}.*?{re.escape(end_marker)}'
-            replacement = f'{start_marker}\n{skills_section}\n{end_marker}'
+            # Replace content between markers
+            start_idx = content.find(start_marker) + len(start_marker)
+            end_idx = content.find(end_marker)
             
-            new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+            new_content = (
+                content[:start_idx] +
+                '\n' + inventory_markdown.strip() + '\n' +
+                content[end_idx:]
+            )
             
-            if new_content == content:
-                print('ℹ️  No changes needed in README.md')
-                return True
-            
-            # Write updated content
+            # Write updated README
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
             
@@ -209,33 +208,17 @@ class ReadmeUpdater:
             print(f'❌ Error updating README.md: {e}')
             return False
 
-def main():
-    updater = ReadmeUpdater()
-    
-    # Scan for skills
-    updater.scan_skills()
-    
-    # Update README
-    if updater.update_readme():
-        print('\\n📋 Skills inventory updated in README.md')
-        print(f'📊 Total skills: {updater.stats["total_skills"]}')
-        print(f'📁 Categories: {updater.stats["categories"]}')
-        return True
-    else:
-        print('\\n❌ Failed to update README.md')
-        return False
-
-if __name__ == '__main__':
-    import sys
-    success = main()
-    sys.exit(0 if success else 1)
+# Run the updater
+updater = ReadmeUpdater()
+success = updater.update_readme()
+exit(0 if success else 1)
           "
 
       - name: Check for changes
         id: changes
         run: |
           if git diff --quiet; then
-            echo "No changes needed"
+            echo "No changes detected"
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "Changes detected"
@@ -248,47 +231,62 @@ if __name__ == '__main__':
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
-          git commit -m "🤖 Auto-update skills inventory in README
+          git commit -m "🤖 Auto-update README with skills inventory
 
           - Updated skills inventory
-          - Added statistics and categorization
-          - Auto-generated by GitHub Actions"
-          
-          # Push changes
+          - Generated on: $(date -u '+%Y-%m-%d %H:%M UTC')
+          - Total skills: $(python3 -c "
+          import json
+          from pathlib import Path
+          skills_count = 0
+          for p in ['skills', '.claude/skills']:
+              path = Path(p)
+              if path.exists():
+                  for cat in path.iterdir():
+                      if cat.is_dir() and not cat.name.startswith('.'):
+                          skills_count += len([s for s in cat.iterdir() if s.is_dir() and not s.name.startswith('.')])
+          print(skills_count)
+          ")
+          "
           git push
 
-      - name: Create Pull Request
-        if: steps.changes.outputs.changed == 'true' && github.event_name == 'workflow_dispatch'
-        uses: peter-evans/create-pull-request@v5
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "🤖 Auto-update skills inventory in README"
-          title: "🤖 Auto-update skills inventory in README"
-          body: |
-            ## 📋 Skills Inventory Update
+          script: |
+            const comment = `## 📋 README Auto-Update
             
-            This PR automatically updates the skills inventory section in README.md with the latest information about available skills.
+            ✅ README has been automatically updated with the latest skills inventory!
             
-            ### Changes:
-            - Updated skills list and categorization
-            - Added statistics about total skills and categories
-            - Generated on: ${{ github.event.head_commit.timestamp || github.event.schedule }}
+            **Changes made:**
+            - Updated skills inventory section
+            - Added latest skill information
+            - Updated timestamps and statistics
             
-            ### Auto-generated by:
-            - GitHub Actions workflow: `${{ github.workflow }}`
-            - Run ID: `${{ github.run_id }}`
+            **Status**: ${{
+              '${{ job.status }}' === 'success' ? '✅ COMPLETED' : '❌ FAILED'
+            }}
+            
+            Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed information.
             
             ---
-            *This PR was automatically generated by the README Auto-Update workflow.*
-          branch: auto-update-readme-skills
-          delete-branch: true
+            *This comment was automatically generated by the README auto-updater.*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
-      - name: Upload skills inventory
+      - name: Generate summary
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: skills-inventory
-          path: |
-            skills-inventory.json
-            README.md
-          retention-days: 30
+        run: |
+          echo "## 📋 README Auto-Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ README auto-update workflow completed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the workflow logs for detailed information about what was updated." >> $GITHUB_STEP_SUMMARY

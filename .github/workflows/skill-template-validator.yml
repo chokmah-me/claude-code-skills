@@ -143,9 +143,9 @@ class SkillTemplateValidator:
         print('='*60)
         
         print(f'\n📊 Statistics:')
-        print(f'  Total Skills Checked: {self.stats["total_skills"]}')
-        print(f'  Valid Skills: {self.stats["valid_skills"]}')
-        print(f'  Success Rate: {(self.stats["valid_skills"]/max(self.stats["total_skills"], 1)*100):.1f}%')
+        print(f'  Total Skills Checked: {self.stats[\"total_skills\"]}')
+        print(f'  Valid Skills: {self.stats[\"valid_skills\"]}')
+        print(f'  Success Rate: {(self.stats[\"valid_skills\"]/max(self.stats[\"total_skills\"], 1)*100):.1f}%')
         
         if self.errors:
             print(f'\n❌ Errors ({len(self.errors)}):')
@@ -244,3 +244,14 @@ if __name__ == '__main__':
               repo: context.repo.repo,
               body: comment
             });
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 🔍 Skill Template Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Skill template validation workflow completed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow validates that skills follow the established template structure." >> $GITHUB_STEP_SUMMARY
