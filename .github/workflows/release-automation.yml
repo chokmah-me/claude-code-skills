@@ -49,33 +49,33 @@ jobs:
           
           # Validate version format
           if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ Invalid version format: $VERSION"
+            echo "[ERROR] Invalid version format: $VERSION"
             echo "Expected format: v1.2.3"
             exit 1
           fi
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "is-prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
-          echo "✅ Version validated: $VERSION"
+          echo "[OK] Version validated: $VERSION"
 
       - name: Check if tag exists
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
           if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "✅ Tag $VERSION exists"
+            echo "[OK] Tag $VERSION exists"
           else
-            echo "❌ Tag $VERSION does not exist"
+            echo "[ERROR] Tag $VERSION does not exist"
             exit 1
           fi
 
       - name: Validate repository structure
         run: |
-          echo "🔍 Validating repository structure..."
+          echo "[SCAN] Validating repository structure..."
           
           # Check main directories exist
           for dir in skills docs templates tests; do
             if [ ! -d "$dir" ]; then
-              echo "❌ Missing directory: $dir"
+              echo "[ERROR] Missing directory: $dir"
               exit 1
             fi
           done
@@ -85,20 +85,20 @@ jobs:
           for skill in "${META_SKILLS[@]}"; do
             SKILL_DIR="skills/meta/$skill"
             if [ ! -d "$SKILL_DIR" ]; then
-              echo "❌ Missing meta skill directory: $skill"
+              echo "[ERROR] Missing meta skill directory: $skill"
               exit 1
             fi
             
             # Check for required files
             if [ ! -f "$SKILL_DIR/SKILL.md" ]; then
-              echo "❌ Missing SKILL.md for: $skill"
+              echo "[ERROR] Missing SKILL.md for: $skill"
               exit 1
             fi
             
-            echo "✅ $skill structure validated"
+            echo "[OK] $skill structure validated"
           done
           
-          echo "✅ Repository structure validation complete"
+          echo "[OK] Repository structure validation complete"
 
   generate-release-notes:
     name: Generate Release Notes
@@ -116,22 +116,22 @@ jobs:
         id: notes
         run: |
           VERSION="${{ needs.validate-release.outputs.version }}"
-          echo "📝 Generating release notes for $VERSION..."
+          echo "[LOG] Generating release notes for $VERSION..."
           
           # Get previous tag
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           
           if [ -n "$PREV_TAG" ]; then
-            echo "📊 Comparing $VERSION to $PREV_TAG"
+            echo "[STATS] Comparing $VERSION to $PREV_TAG"
             CHANGES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
           else
-            echo "📊 First release - showing all commits"
+            echo "[STATS] First release - showing all commits"
             CHANGES=$(git log --pretty=format:"- %s" --max-count=50)
           fi
           
           # Generate structured release notes
           cat > release_notes.md << 'EOF'
-          ## 🎉 What's New in ${{ needs.validate-release.outputs.version }}
+          ## [SUCCESS] What's New in ${{ needs.validate-release.outputs.version }}
           
           ### Changes
           $CHANGES
@@ -169,7 +169,7 @@ git clone https://github.com/chokmah-me/claude-code-skills.git
           echo "$CONTENT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
-          echo "✅ Release notes generated"
+          echo "[OK] Release notes generated"
 
   create-release-artifacts:
     name: Create Release Artifacts
@@ -191,7 +191,7 @@ git clone https://github.com/chokmah-me/claude-code-skills.git
 
       - name: Generate skill inventory
         run: |
-          echo "📋 Generating skill inventory..."
+          echo "[LIST] Generating skill inventory..."
           python -c "
 import os
 import yaml
@@ -236,7 +236,7 @@ def generate_inventory():
                 f.write(f'- [{skill}](skills/{category}/{skill}/README.md)\n')
             f.write('\n')
     
-    print(f'✅ Generated inventory: {inventory[\"total_skills\"]} total skills')
+    print(f'[OK] Generated inventory: {inventory[\"total_skills\"]} total skills')
 
  generate_inventory()
           "
@@ -244,7 +244,7 @@ def generate_inventory():
       - name: Create distribution package
         run: |
           VERSION="${{ needs.validate-release.outputs.version }}"
-          echo "📦 Creating distribution package for $VERSION..."
+          echo "[PACKAGE] Creating distribution package for $VERSION..."
           
           # Create distribution directory
           mkdir -p dist
@@ -272,7 +272,7 @@ def generate_inventory():
           cd dist
           sha256sum *.tar.gz > checksums.txt
           
-          echo "✅ Distribution packages created"
+          echo "[OK] Distribution packages created"
           ls -la dist/
 
       - name: Upload artifacts
@@ -319,7 +319,7 @@ def generate_inventory():
         run: |
           git tag -f latest ${{ needs.validate-release.outputs.version }}
           git push origin latest --force
-          echo "✅ Updated 'latest' tag"
+          echo "[OK] Updated 'latest' tag"
 
   notify-completion:
     name: Notify Completion
@@ -331,9 +331,9 @@ def generate_inventory():
         run: |
           VERSION="${{ needs.validate-release.outputs.version }}"
           if [ "${{ needs.publish-release.result }}" = "success" ]; then
-            echo "✅ Release $VERSION published successfully!"
-            echo "📍 Release URL: https://github.com/${{ github.repository }}/releases/tag/$VERSION"
+            echo "[OK] Release $VERSION published successfully!"
+            echo " Release URL: https://github.com/${{ github.repository }}/releases/tag/$VERSION"
           else
-            echo "❌ Release $VERSION failed"
+            echo "[ERROR] Release $VERSION failed"
             exit 1
           fi

@@ -38,7 +38,7 @@ jobs:
 
       - name: Find and validate links
         run: |
-          echo "🔍 Scanning documentation for broken links..."
+          echo "[SCAN] Scanning documentation for broken links..."
           python -c "
 import os
 import re
@@ -68,7 +68,7 @@ class LinkValidator:
     
     def scan_repository_files(self):
         '''Scan repository for all markdown files'''
-        print('📁 Scanning repository for markdown files...')
+        print('[DIR] Scanning repository for markdown files...')
         
         # Common documentation directories
         doc_dirs = ['.', 'docs', 'skills', '.claude/skills']
@@ -84,7 +84,7 @@ class LinkValidator:
                     relative_path = md_file.relative_to(Path.cwd())
                     self.internal_files.add(str(relative_path))
         
-        print(f'📊 Found {len(self.internal_files)} markdown files')
+        print(f'[STATS] Found {len(self.internal_files)} markdown files')
     
     def extract_links_from_file(self, file_path):
         '''Extract all links from a markdown file'''
@@ -131,7 +131,7 @@ class LinkValidator:
                     })
             
         except Exception as e:
-            print(f'⚠️  Error reading {file_path}: {e}')
+            print(f'[WARN]  Error reading {file_path}: {e}')
         
         return links
     
@@ -244,13 +244,13 @@ class LinkValidator:
     
     def validate_all_links(self):
         '''Validate all links found in the repository'''
-        print('🔍 Validating links...')
+        print('[SCAN] Validating links...')
         
         total_links = 0
         valid_links = 0
         
         for md_file in self.internal_files:
-            print(f'📄 Checking {md_file}...')
+            print(f'[FILE] Checking {md_file}...')
             links = self.extract_links_from_file(md_file)
             
             for link in links:
@@ -304,19 +304,19 @@ class LinkValidator:
     def generate_report(self):
         '''Generate comprehensive link validation report'''
         print('\\n' + '='*60)
-        print('🔗 DOCUMENTATION LINK VALIDATION REPORT')
+        print('[LINK] DOCUMENTATION LINK VALIDATION REPORT')
         print('='*60)
         
         total_links, valid_links = self.validate_all_links()
         
-        print(f'\\n📊 Statistics:')
+        print(f'\\n[STATS] Statistics:')
         print(f'  Files Scanned: {len(self.internal_files)}')
         print(f'  Total Links: {total_links}')
         print(f'  Valid Links: {valid_links}')
         print(f'  Success Rate: {(valid_links/max(total_links, 1)*100):.1f}%')
         
         if self.broken_links:
-            print(f'\\n❌ Broken Links ({len(self.broken_links)}):')
+            print(f'\\n[ERROR] Broken Links ({len(self.broken_links)}):')
             # Group by error type
             error_groups = defaultdict(list)
             for link in self.broken_links:
@@ -330,7 +330,7 @@ class LinkValidator:
                     print(f'    ... and {len(links) - 3} more')
         
         if self.warning_links:
-            print(f'\\n⚠️  Warning Links ({len(self.warning_links)}):')
+            print(f'\\n[WARN]  Warning Links ({len(self.warning_links)}):')
             for link in self.warning_links[:5]:
                 print(f'  - {link[\"url\"]}: {link[\"error\"]} ({link[\"file\"]})')
             if len(self.warning_links) > 5:
@@ -343,7 +343,7 @@ class LinkValidator:
             type_counts[category] += len(links)
         
         if type_counts:
-            print(f'\\n📈 Link Type Breakdown:')
+            print(f'\\n Link Type Breakdown:')
             for link_type, count in sorted(type_counts.items()):
                 print(f'  {link_type}: {count}')
         
@@ -407,29 +407,29 @@ if __name__ == '__main__':
               console.log('Could not read validation results');
             }
             
-            let comment = `## 🔗 Documentation Link Validation
+            let comment = `## [LINK] Documentation Link Validation
             
-            ✅ Documentation link validation completed!
+            [OK] Documentation link validation completed!
             
             This workflow checks all links in markdown files:
-            - 🔍 Internal links to other documentation files
-            - 🌐 External URLs for accessibility
-            - 📧 Special links (mailto, tel)
-            - ⚓ Anchor links within documents
+            - [SCAN] Internal links to other documentation files
+            -  External URLs for accessibility
+            -  Special links (mailto, tel)
+            -  Anchor links within documents
             
-            **Status**: ${{ job.status == 'success' && (!hasBrokenLinks && '✅ ALL LINKS VALID' || '⚠️  SOME BROKEN LINKS FOUND') || '❌ VALIDATION FAILED' }}
+            **Status**: ${{ job.status == 'success' && (!hasBrokenLinks && '[OK] ALL LINKS VALID' || '[WARN]  SOME BROKEN LINKS FOUND') || '[ERROR] VALIDATION FAILED' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed results.
             
             ### What was checked:
-            - ✅ All markdown files in the repository
-            - ✅ Internal file references and paths
-            - ✅ External website links (with rate limiting)
-            - ✅ Email and phone number formats
-            - ✅ Anchor references within documents
+            - [OK] All markdown files in the repository
+            - [OK] Internal file references and paths
+            - [OK] External website links (with rate limiting)
+            - [OK] Email and phone number formats
+            - [OK] Anchor references within documents
             
             ${{
-              hasBrokenLinks ? '\\n⚠️  **Action Required**: Broken links were found. Please review the workflow logs and fix any broken links before merging.**' : ''
+              hasBrokenLinks ? '\\n[WARN]  **Action Required**: Broken links were found. Please review the workflow logs and fix any broken links before merging.**' : ''
             }}
             
             ---

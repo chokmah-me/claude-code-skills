@@ -37,7 +37,7 @@ jobs:
 
       - name: Check skill consistency
         run: |
-          echo "🔍 Checking skill consistency across the repository..."
+          echo "[SCAN] Checking skill consistency across the repository..."
           python -c "
 import os
 import re
@@ -67,7 +67,7 @@ class SkillConsistencyChecker:
         for base_path, location_name in skill_locations:
             skills_dir = Path(base_path)
             if skills_dir.exists():
-                print(f'📁 Scanning {location_name} directory...')
+                print(f'[DIR] Scanning {location_name} directory...')
                 
                 for category_dir in skills_dir.iterdir():
                     if category_dir.is_dir() and not category_dir.name.startswith('.'):
@@ -275,14 +275,14 @@ class SkillConsistencyChecker:
         for skill, deps in dependency_graph.items():
             for dep in deps:
                 if dep in dependency_graph and skill in dependency_graph[dep]:
-                    dependency_issues.append(f'Circular dependency detected: {skill} ↔ {dep}')
+                    dependency_issues.append(f'Circular dependency detected: {skill} <-> {dep}')
         
         return dependency_issues
     
     def generate_consistency_report(self):
         '''Generate comprehensive consistency report'''
         print('\\n' + '='*60)
-        print('🔍 SKILL CONSISTENCY ANALYSIS REPORT')
+        print('[SCAN] SKILL CONSISTENCY ANALYSIS REPORT')
         print('='*60)
         
         # Run all checks
@@ -293,22 +293,22 @@ class SkillConsistencyChecker:
         
         all_issues = naming_issues + structure_issues + quality_issues + dependency_issues
         
-        print(f'\\n📊 Repository Statistics:')
+        print(f'\\n[STATS] Repository Statistics:')
         print(f'  Total Skills: {self.stats.get(\"total_skills\", 0)}')
         print(f'  Categories: {len(self.skill_patterns[\"categories\"])}')
         print(f'  Unique Structures: {len(self.skill_patterns[\"structures\"])}')
         print(f'  Dependencies Found: {sum(len(deps) for deps in self.skill_patterns[\"dependencies\"].values())}')
         
         if all_issues:
-            print(f'\\n⚠️  Consistency Issues Found ({len(all_issues)}):')
+            print(f'\\n[WARN]  Consistency Issues Found ({len(all_issues)}):')
             for i, issue in enumerate(all_issues, 1):
                 print(f'  {i}. {issue}')
         else:
-            print('\\n✅ No consistency issues found!')
+            print('\\n[OK] No consistency issues found!')
         
         # Category breakdown
         if self.skill_patterns['categories']:
-            print(f'\\n📁 Category Breakdown:')
+            print(f'\\n[DIR] Category Breakdown:')
             for category, skills in sorted(self.skill_patterns['categories'].items()):
                 avg_quality = sum(s['structure_score'] for s in skills) / len(skills) if skills else 0
                 print(f'  {category}: {len(skills)} skills (avg quality: {avg_quality:.1%})')
@@ -351,10 +351,10 @@ if __name__ == '__main__':
       - name: Generate consistency summary
         if: always()
         run: |
-          echo "📋 Generating consistency summary..."
+          echo "[LIST] Generating consistency summary..."
           echo "## Skill Consistency Check Summary" > consistency-summary.md
           echo "" >> consistency-summary.md
-          echo "✅ Consistency analysis completed!" >> consistency-summary.md
+          echo "[OK] Consistency analysis completed!" >> consistency-summary.md
           echo "" >> consistency-summary.md
           echo "**Check the workflow logs above for detailed results.**" >> consistency-summary.md
 
@@ -375,27 +375,27 @@ if __name__ == '__main__':
           script: |
             const fs = require('fs');
             
-            let comment = `## 🔍 Skill Consistency Check
+            let comment = `## [SCAN] Skill Consistency Check
             
-            ✅ Skill consistency analysis completed!
+            [OK] Skill consistency analysis completed!
             
             This workflow checks for consistency across all skills in the repository:
-            - ✨ Naming convention consistency
-            - 📁 File structure standardization
-            - 🎯 Quality scoring and validation
-            - 🔗 Dependency analysis
-            - 📊 Cross-skill compatibility
+            - [NEW] Naming convention consistency
+            - [DIR] File structure standardization
+            - [TARGET] Quality scoring and validation
+            - [LINK] Dependency analysis
+            - [STATS] Cross-skill compatibility
             
-            **Status**: ${{ job.status == 'success' && '✅ CONSISTENT' || '⚠️  INCONSISTENCIES FOUND' }}
+            **Status**: ${{ job.status == 'success' && '[OK] CONSISTENT' || '[WARN]  INCONSISTENCIES FOUND' }}
             
             Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed analysis.
             
             ### What was checked:
-            - ✅ Naming conventions (kebab-case, snake_case, etc.)
-            - ✅ Required file structure (SKILL.md, README.md, template.md)
-            - ✅ Content quality and completeness
-            - ✅ Skill dependencies and circular references
-            - ✅ Category organization and consistency
+            - [OK] Naming conventions (kebab-case, snake_case, etc.)
+            - [OK] Required file structure (SKILL.md, README.md, template.md)
+            - [OK] Content quality and completeness
+            - [OK] Skill dependencies and circular references
+            - [OK] Category organization and consistency
             
             ---
             *This comment was automatically generated by the skill consistency checker.*`;

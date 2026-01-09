@@ -36,7 +36,7 @@ jobs:
 
       - name: Validate skill documentation
         run: |
-          echo "🔍 Validating skill documentation..."
+          echo "[SCAN] Validating skill documentation..."
           python -c "
 import os
 import re
@@ -54,7 +54,7 @@ class DocumentationValidator:
         self.stats['total_skills'] += 1
         skill_valid = True
         
-        print(f'🔍 Validating {category}/{skill_name}...')
+        print(f'[SCAN] Validating {category}/{skill_name}...')
         
         # Check required files
         skill_dir = Path(skill_path)
@@ -83,10 +83,10 @@ class DocumentationValidator:
         
         if skill_valid:
             self.stats['valid_skills'] += 1
-            print(f'  ✅ {skill_name} documentation is valid')
+            print(f'  [OK] {skill_name} documentation is valid')
         else:
             self.stats['missing_docs'] += 1
-            print(f'  ❌ {skill_name} has documentation issues')
+            print(f'  [ERROR] {skill_name} has documentation issues')
     
     def validate_skill_file(self, file_path, category, skill_name):
         '''Validate SKILL.md content'''
@@ -169,22 +169,22 @@ class DocumentationValidator:
     def generate_report(self):
         '''Generate validation report'''
         print('\n' + '='*60)
-        print('📋 DOCUMENTATION VALIDATION REPORT')
+        print('[LIST] DOCUMENTATION VALIDATION REPORT')
         print('='*60)
         
-        print(f'\n📊 Statistics:')
+        print(f'\n[STATS] Statistics:')
         print(f'  Total Skills: {self.stats[\"total_skills\"]}')
         print(f'  Valid Skills: {self.stats[\"valid_skills\"]}')
         print(f'  Missing Docs: {self.stats[\"missing_docs\"]}')
         print(f'  Success Rate: {(self.stats[\"valid_skills\"]/max(self.stats[\"total_skills\"], 1)*100):.1f}%')
         
         if self.errors:
-            print(f'\n❌ Errors ({len(self.errors)}):')
+            print(f'\n[ERROR] Errors ({len(self.errors)}):')
             for error in self.errors:
                 print(f'  - {error}')
         
         if self.warnings:
-            print(f'\n⚠️  Warnings ({len(self.warnings)}):')
+            print(f'\n[WARN]  Warnings ({len(self.warnings)}):')
             for warning in self.warnings:
                 print(f'  - {warning}')
         
@@ -192,13 +192,13 @@ class DocumentationValidator:
         
         # Return appropriate exit code
         if self.errors:
-            print('❌ Documentation validation FAILED')
+            print('[ERROR] Documentation validation FAILED')
             return False
         elif self.warnings:
-            print('⚠️  Documentation validation PASSED with warnings')
+            print('[WARN]  Documentation validation PASSED with warnings')
             return True
         else:
-            print('✅ Documentation validation PASSED')
+            print('[OK] Documentation validation PASSED')
             return True
 
 def main():
@@ -207,13 +207,13 @@ def main():
     # Scan skills directory
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return False
     
     for category_dir in skills_dir.iterdir():
         if category_dir.is_dir() and category_dir.name != '__pycache__':
             category = category_dir.name
-            print(f'📁 Scanning category: {category}')
+            print(f'[DIR] Scanning category: {category}')
             
             for skill_dir in category_dir.iterdir():
                 if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
@@ -230,7 +230,7 @@ if __name__ == '__main__':
 
       - name: Check documentation consistency
         run: |
-          echo "🔍 Checking documentation consistency..."
+          echo "[SCAN] Checking documentation consistency..."
           python -c "
 import os
 import re
@@ -243,7 +243,7 @@ def check_consistency():
     
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return False
     
     for category_dir in skills_dir.iterdir():
@@ -290,17 +290,17 @@ def check_consistency():
     
     # Report results
     if warnings:
-        print(f'\n⚠️  Consistency Warnings ({len(warnings)}):')
+        print(f'\n[WARN]  Consistency Warnings ({len(warnings)}):')
         for warning in warnings:
             print(f'  - {warning}')
     
     if errors:
-        print(f'\n❌ Consistency Errors ({len(errors)}):')
+        print(f'\n[ERROR] Consistency Errors ({len(errors)}):')
         for error in errors:
             print(f'  - {error}')
         return False
     
-    print('✅ Documentation consistency check completed')
+    print('[OK] Documentation consistency check completed')
     return True
 
 check_consistency()
@@ -309,7 +309,7 @@ check_consistency()
       - name: Generate documentation report
         if: always()
         run: |
-          echo "📋 Generating documentation report..."
+          echo "[LIST] Generating documentation report..."
           python -c "
 import json
 from pathlib import Path
@@ -326,7 +326,7 @@ def generate_doc_report():
     
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return
     
     total_skills = 0
@@ -388,22 +388,22 @@ def generate_doc_report():
         f.write('# Documentation Report\n\n')
         f.write(f'Generated: {report[\"timestamp\"]}\n\n')
         
-        f.write('## 📊 Statistics\n\n')
+        f.write('## [STATS] Statistics\n\n')
         f.write(f'- **Total Skills**: {total_skills}\n')
         f.write(f'- **Skills with README**: {skills_with_readme} ({report[\"statistics\"][\"readme_coverage\"]:.1f}%)\n')
         f.write(f'- **Skills with Templates**: {skills_with_template} ({report[\"statistics\"][\"template_coverage\"]:.1f}%)\n')
         f.write(f'- **Meta Skills**: {meta_skills}\n\n')
         
-        f.write('## 📋 Category Breakdown\n\n')
+        f.write('## [LIST] Category Breakdown\n\n')
         for category, data in report['documentation_status'].items():
             f.write(f'### {category.title()}\n')
             f.write(f'- Total: {data[\"total\"]}\n')
             f.write(f'- With README: {data[\"with_readme\"]}\n')
             f.write(f'- With Templates: {data[\"with_template\"]}\n\n')
     
-    print('✅ Documentation report generated')
-    print(f'📊 README coverage: {report[\"statistics\"][\"readme_coverage\"]:.1f}%')
-    print(f'📊 Template coverage: {report[\"statistics\"][\"template_coverage\"]:.1f}%')
+    print('[OK] Documentation report generated')
+    print(f'[STATS] README coverage: {report[\"statistics\"][\"readme_coverage\"]:.1f}%')
+    print(f'[STATS] Template coverage: {report[\"statistics\"][\"template_coverage\"]:.1f}%')
 
 generate_doc_report()
           "
@@ -437,9 +437,9 @@ generate_doc_report()
               console.log('Could not read documentation report');
             }
             
-            const comment = `## 📋 Documentation Validation Report
+            const comment = `## [LIST] Documentation Validation Report
             
-            ✅ Documentation validation completed successfully!
+            [OK] Documentation validation completed successfully!
             
             ${reportContent ? '### Summary\n\n' + reportContent.split('\n').slice(0, 20).join('\n') + '\n\n[View full report in workflow artifacts](' + context.payload.pull_request.html_url + '/checks)' : ''}
             

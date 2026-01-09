@@ -53,7 +53,7 @@ jobs:
 
       - name: Analyze changes and update changelog
         run: |
-          echo "📝 Analyzing changes for changelog..."
+          echo "[LOG] Analyzing changes for changelog..."
           python -c "
 import os
 import re
@@ -160,7 +160,7 @@ class ChangelogGenerator:
                     self.changes['deprecated'].append(self.format_commit_entry(subject, body))
                 
         except Exception as e:
-            print(f'⚠️  Error analyzing commits: {e}')
+            print(f'[WARN]  Error analyzing commits: {e}')
     
     def format_commit_entry(self, subject, body):
         '''Format a commit entry for changelog'''
@@ -227,7 +227,7 @@ class ChangelogGenerator:
                                         })
                                         
                                 except Exception as e:
-                                    print(f'⚠️  Error checking skill {skill_name}: {e}')
+                                    print(f'[WARN]  Error checking skill {skill_name}: {e}')
         
         return skills_changes
     
@@ -301,11 +301,11 @@ class ChangelogGenerator:
             with open(changelog_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
             
-            print(f'✅ Changelog updated with version {version or \"new entry\"}')
+            print(f'[OK] Changelog updated with version {version or \"new entry\"}')
             return True
             
         except Exception as e:
-            print(f'❌ Error updating changelog: {e}')
+            print(f'[ERROR] Error updating changelog: {e}')
             return False
 
 def main():
@@ -318,7 +318,7 @@ def main():
     if not version:
         version = generator.calculate_next_version(release_type)
     
-    print(f'📝 Generating changelog for version {version}...')
+    print(f'[LOG] Generating changelog for version {version}...')
     
     # Generate changelog entry
     new_entry = generator.generate_changelog_entry(version, release_type)
@@ -364,7 +364,7 @@ if __name__ == '__main__':
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add CHANGELOG.md
-          git commit -m "📝 Auto-update changelog
+          git commit -m "[LOG] Auto-update changelog
 
           - Added recent changes and updates
           - Generated from commit history
@@ -408,9 +408,9 @@ if __name__ == '__main__':
           script: |
             const fs = require('fs');
             
-            let comment = `## 📝 Changelog Update
+            let comment = `## [LOG] Changelog Update
             
-            ✅ Changelog has been automatically updated with this merged PR!
+            [OK] Changelog has been automatically updated with this merged PR!
             
             The changelog now includes:
             - This PR's changes and improvements

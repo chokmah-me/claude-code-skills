@@ -57,13 +57,13 @@ jobs:
           fi
           
           echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
-          echo "🎯 Test strategy: $STRATEGY"
+          echo "[TARGET] Test strategy: $STRATEGY"
 
       - name: Get changed skills
         id: changes
         if: github.event_name == 'pull_request'
         run: |
-          echo "🔍 Finding changed skills..."
+          echo "[SCAN] Finding changed skills..."
           CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
           
           CHANGED_SKILLS="[]"
@@ -109,17 +109,17 @@ jobs:
       - name: Test ${{ matrix.skill }}
         timeout-minutes: 10
         run: |
-          echo "🧪 Testing meta skill: ${{ matrix.skill }}"
+          echo "[TEST] Testing meta skill: ${{ matrix.skill }}"
           SKILL_DIR="skills/meta/${{ matrix.skill }}"
           
           if [ ! -d "$SKILL_DIR" ]; then
-            echo "❌ Skill directory not found: $SKILL_DIR"
+            echo "[ERROR] Skill directory not found: $SKILL_DIR"
             exit 1
           fi
           
           # Test SKILL.md parsing
           if [ -f "$SKILL_DIR/SKILL.md" ]; then
-            echo "📋 Testing SKILL.md parsing..."
+            echo "[LIST] Testing SKILL.md parsing..."
             python -c "
 import re
 from pathlib import Path
@@ -142,21 +142,21 @@ if skill_file.exists():
             missing_patterns.append(pattern)
     
     if missing_patterns:
-        print(f'⚠️  Missing patterns: {missing_patterns}')
+        print(f'[WARN]  Missing patterns: {missing_patterns}')
     else:
-        print('✅ SKILL.md structure is valid')
+        print('[OK] SKILL.md structure is valid')
     
     # Check for token efficiency mentions (for meta skills)
     if 'token' in content.lower():
-        print('✅ Token efficiency mentioned')
+        print('[OK] Token efficiency mentioned')
     else:
-        print('⚠️  Consider mentioning token efficiency')
+        print('[WARN]  Consider mentioning token efficiency')
 "
           fi
           
           # Test README.md if exists
           if [ -f "$SKILL_DIR/README.md" ]; then
-            echo "📖 Testing README.md..."
+            echo " Testing README.md..."
             python -c "
 import re
 from pathlib import Path
@@ -169,22 +169,22 @@ if readme_file.exists():
     sections = ['overview', 'usage', 'examples', 'installation']
     found_sections = [s for s in sections if s in content.lower()]
     
-    print(f'📚 Found sections: {found_sections}')
+    print(f' Found sections: {found_sections}')
     
     # Check for code examples
     code_blocks = len(re.findall(r'```', content))
-    print(f'📝 Code blocks: {code_blocks}')
+    print(f'[LOG] Code blocks: {code_blocks}')
     
     if len(found_sections) >= 3 and code_blocks >= 2:
-        print('✅ README.md is comprehensive')
+        print('[OK] README.md is comprehensive')
     else:
-        print('⚠️  README.md could be more detailed')
+        print('[WARN]  README.md could be more detailed')
 "
           fi
           
           # Test template.md if exists
           if [ -f "$SKILL_DIR/template.md" ]; then
-            echo "📄 Testing template.md..."
+            echo "[FILE] Testing template.md..."
             python -c "
 from pathlib import Path
 
@@ -196,17 +196,17 @@ if template_file.exists():
     placeholders = content.count('{{') + content.count('}}')
     todos = content.upper().count('TODO')
     
-    print(f'🎯 Template placeholders: {placeholders}')
-    print(f'✏️  TODO items: {todos}')
+    print(f'[TARGET] Template placeholders: {placeholders}')
+    print(f'  TODO items: {todos}')
     
     if placeholders > 0 or todos > 0:
-        print('✅ Template has customization points')
+        print('[OK] Template has customization points')
     else:
-        print('⚠️  Template might benefit from placeholders')
+        print('[WARN]  Template might benefit from placeholders')
 "
           fi
           
-          echo "✅ ${{ matrix.skill }} testing completed"
+          echo "[OK] ${{ matrix.skill }} testing completed"
 
   test-skill-functionality:
     name: Test Skill Functionality
@@ -233,11 +233,11 @@ if template_file.exists():
       - name: Test ${{ matrix.skill-category }} skills
         timeout-minutes: 15
         run: |
-          echo "🧪 Testing ${{ matrix.skill-category }} skills..."
+          echo "[TEST] Testing ${{ matrix.skill-category }} skills..."
           CATEGORY_DIR="skills/${{ matrix.skill-category }}"
           
           if [ ! -d "$CATEGORY_DIR" ]; then
-            echo "❌ Category directory not found: $CATEGORY_DIR"
+            echo "[ERROR] Category directory not found: $CATEGORY_DIR"
             exit 1
           fi
           
@@ -245,7 +245,7 @@ if template_file.exists():
           SKILLS=$(find "$CATEGORY_DIR" -mindepth 1 -maxdepth 1 -type d | xargs -I {} basename {} | sort)
           
           if [ -z "$SKILLS" ]; then
-            echo "⚠️  No skills found in ${{ matrix.skill-category }} category"
+            echo "[WARN]  No skills found in ${{ matrix.skill-category }} category"
             exit 0
           fi
           
@@ -253,7 +253,7 @@ if template_file.exists():
           
           # Test each skill
           for skill in $SKILLS; do
-            echo "🔍 Testing $skill..."
+            echo "[SCAN] Testing $skill..."
             SKILL_DIR="$CATEGORY_DIR/$skill"
             
             # Test SKILL.md exists and is valid
@@ -268,32 +268,32 @@ try:
     
     # Basic validation
     if len(content) < 100:
-        print(f'⚠️  SKILL.md seems very short ({len(content)} chars)')
+        print(f'[WARN]  SKILL.md seems very short ({len(content)} chars)')
     
     # Check for skill invocation
     skill_name = '$skill'
     if f'/{skill_name}' in content:
-        print(f'✅ Found skill invocation: /{skill_name}')
+        print(f'[OK] Found skill invocation: /{skill_name}')
     else:
-        print(f'⚠️  Missing skill invocation pattern: /{skill_name}')
+        print(f'[WARN]  Missing skill invocation pattern: /{skill_name}')
     
     # Check for purpose statement
     if 'purpose:' in content.lower():
-        print('✅ Found purpose statement')
+        print('[OK] Found purpose statement')
     else:
-        print('⚠️  Missing purpose statement')
+        print('[WARN]  Missing purpose statement')
     
-    print(f'✅ {skill_name} basic validation passed')
+    print(f'[OK] {skill_name} basic validation passed')
     
 except Exception as e:
-    print(f'❌ Error testing {skill_name}: {e}')
+    print(f'[ERROR] Error testing {skill_name}: {e}')
 "
             else
-              echo "❌ Missing SKILL.md for $skill"
+              echo "[ERROR] Missing SKILL.md for $skill"
             fi
           done
           
-          echo "✅ ${{ matrix.skill-category }} skills testing completed"
+          echo "[OK] ${{ matrix.skill-category }} skills testing completed"
 
   performance-analysis:
     name: Performance Analysis
@@ -310,7 +310,7 @@ except Exception as e:
 
       - name: Analyze skill complexity
         run: |
-          echo "📊 Analyzing skill complexity and token usage..."
+          echo "[STATS] Analyzing skill complexity and token usage..."
           
           python -c "
 import re
@@ -328,7 +328,7 @@ def analyze_skill_complexity():
     
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return
     
     for category_dir in skills_dir.iterdir():
@@ -384,35 +384,35 @@ def analyze_skill_complexity():
                                     f'{category}/{skill_name}: Consider optimization for token efficiency ({estimated_tokens} tokens)'
                                 )
                             
-                            print(f'📊 {category}/{skill_name}: ~{estimated_tokens} tokens ({complexity_level})')
+                            print(f'[STATS] {category}/{skill_name}: ~{estimated_tokens} tokens ({complexity_level})')
                             
                         except Exception as e:
-                            print(f'❌ Error analyzing {skill_name}: {e}')
+                            print(f'[ERROR] Error analyzing {skill_name}: {e}')
     
     # Save report
     with open('complexity-analysis.json', 'w') as f:
         json.dump(complexity_report, f, indent=2)
     
     # Generate summary
-    print(f'\\n📈 Complexity Analysis Summary:')
+    print(f'\\n Complexity Analysis Summary:')
     print(f'  Skills analyzed: {complexity_report[\"skills_analyzed\"]}')
     print(f'  Low complexity: {complexity_report[\"complexity_distribution\"][\"low\"]}')
     print(f'  Medium complexity: {complexity_report[\"complexity_distribution\"][\"medium\"]}')
     print(f'  High complexity: {complexity_report[\"complexity_distribution\"][\"high\"]}')
     
     if complexity_report['recommendations']:
-        print(f'\\n💡 Recommendations:')
+        print(f'\\n[INFO] Recommendations:')
         for rec in complexity_report['recommendations']:
             print(f'  - {rec}')
     
-    print('✅ Complexity analysis completed')
+    print('[OK] Complexity analysis completed')
 
 analyze_skill_complexity()
           "
 
       - name: Test skill dependencies
         run: |
-          echo "🔗 Testing skill dependencies..."
+          echo "[LINK] Testing skill dependencies..."
           
           python -c "
 import re
@@ -425,7 +425,7 @@ def analyze_dependencies():
     
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return
     
     # First pass: collect all skill names
@@ -436,7 +436,7 @@ def analyze_dependencies():
                 if skill_dir.is_dir() and not skill_dir.name.startswith('.'):
                     all_skills.add(skill_dir.name)
     
-    print(f'📋 Found {len(all_skills)} total skills')
+    print(f'[LIST] Found {len(all_skills)} total skills')
     
     # Second pass: analyze dependencies
     for category_dir in skills_dir.iterdir():
@@ -472,17 +472,17 @@ def analyze_dependencies():
                             
                             if dependencies:
                                 dependency_map[f'{category}/{skill_name}'] = list(dependencies)
-                                print(f'🔗 {category}/{skill_name} depends on: {', '.join(dependencies)}')
+                                print(f'[LINK] {category}/{skill_name} depends on: {', '.join(dependencies)}')
                             
                         except Exception as e:
-                            print(f'❌ Error analyzing dependencies for {skill_name}: {e}')
+                            print(f'[ERROR] Error analyzing dependencies for {skill_name}: {e}')
     
     # Save dependency map
     with open('skill-dependencies.json', 'w') as f:
         json.dump(dependency_map, f, indent=2)
     
     # Generate dependency report
-    print(f'\\n📊 Dependency Analysis:')
+    print(f'\\n[STATS] Dependency Analysis:')
     print(f'  Skills with dependencies: {len(dependency_map)}')
     
     if dependency_map:
@@ -497,7 +497,7 @@ def analyze_dependencies():
         for skill, count in most_depended:
             print(f'    - {skill}: {count} dependencies')
     
-    print('✅ Dependency analysis completed')
+    print('[OK] Dependency analysis completed')
 
 analyze_dependencies()
           "
@@ -521,7 +521,7 @@ analyze_dependencies()
 
       - name: Run security checks
         run: |
-          echo "🔒 Running security analysis..."
+          echo " Running security analysis..."
           
           # Check for potential security issues in skill definitions
           python -c "
@@ -534,7 +534,7 @@ def security_scan():
     
     skills_dir = Path('skills')
     if not skills_dir.exists():
-        print('❌ Skills directory not found')
+        print('[ERROR] Skills directory not found')
         return
     
     dangerous_patterns = [
@@ -586,27 +586,27 @@ def security_scan():
                                     })
                             
                         except Exception as e:
-                            print(f'❌ Error scanning {skill_name}: {e}')
+                            print(f'[ERROR] Error scanning {skill_name}: {e}')
     
     # Report findings
     if security_issues:
-        print('🔒 Security Issues Found:')
+        print(' Security Issues Found:')
         high_severity = [issue for issue in security_issues if issue['severity'] == 'high']
         medium_severity = [issue for issue in security_issues if issue['severity'] == 'medium']
         
         if high_severity:
-            print(f'\n❌ High Severity ({len(high_severity)}):')
+            print(f'\n[ERROR] High Severity ({len(high_severity)}):')
             for issue in high_severity:
                 print(f'  - {issue[\"skill\"]}: {issue[\"issue\"]}')
         
         if medium_severity:
-            print(f'\n⚠️  Medium Severity ({len(medium_severity)}):')
+            print(f'\n[WARN]  Medium Severity ({len(medium_severity)}):')
             for issue in medium_severity:
                 print(f'  - {issue[\"skill\"]}: {issue[\"issue\"]}')
         
         return False
     else:
-        print('✅ No security issues detected')
+        print('[OK] No security issues detected')
         return True
 
 security_scan()
@@ -614,14 +614,14 @@ security_scan()
 
       - name: Check dependencies for vulnerabilities
         run: |
-          echo "🔍 Checking for vulnerable dependencies..."
+          echo "[SCAN] Checking for vulnerable dependencies..."
           
           # Check if we have any dependency files
           if [ -f "requirements.txt" ] || [ -f "Pipfile" ] || [ -f "pyproject.toml" ]; then
-            echo "📋 Found dependency files - would run vulnerability scan here"
+            echo "[LIST] Found dependency files - would run vulnerability scan here"
             # This would integrate with tools like safety, snyk, etc.
           else
-            echo "✅ No external dependencies to check"
+            echo "[OK] No external dependencies to check"
           fi
 
   generate-test-report:
@@ -640,7 +640,7 @@ security_scan()
 
       - name: Generate comprehensive test report
         run: |
-          echo "📊 Generating comprehensive test report..."
+          echo "[STATS] Generating comprehensive test report..."
           
           python -c "
 import json
@@ -695,20 +695,20 @@ def generate_test_report():
         f.write(f'**Generated**: {report[\"timestamp\"]}\n')
         f.write(f'**Test Run**: {report[\"test_run\"]}\n\n')
         
-        f.write('## 📊 Summary\n\n')
+        f.write('## [STATS] Summary\n\n')
         f.write(f'- **Total Jobs**: {report[\"summary\"][\"total_jobs\"]}\n')
         f.write(f'- **Passed Jobs**: {report[\"summary\"][\"passed_jobs\"]}\n')
         f.write(f'- **Failed Jobs**: {report[\"summary\"][\"failed_jobs\"]}\n')
         f.write(f'- **Success Rate**: {report[\"summary\"][\"success_rate\"]:.1f}%\n\n')
         
-        f.write('## 🔍 Job Results\n\n')
+        f.write('## [SCAN] Job Results\n\n')
         for job, result in report['results'].items():
-            status_icon = '✅' if result['passed'] else '❌' if result['failed'] else '⏭️'
+            status_icon = '[OK]' if result['passed'] else '[ERROR]' if result['failed'] else '�'
             f.write(f'### {status_icon} {job.replace(\"-\", \" \").title()}\n')
             f.write(f'**Status**: {result[\"status\"]}\n\n')
     
-    print('✅ Test report generated')
-    print(f'📊 Overall success rate: {report[\"summary\"][\"success_rate\"]:.1f}%')
+    print('[OK] Test report generated')
+    print(f'[STATS] Overall success rate: {report[\"summary\"][\"success_rate\"]:.1f}%')
 
 generate_test_report()
           "
@@ -738,17 +738,17 @@ generate_test_report()
               console.log('Could not read test report');
             }
             
-            const comment = `## 🧪 Skill Testing Report
+            const comment = `## [TEST] Skill Testing Report
             
-            ✅ Skill testing and validation completed!
+            [OK] Skill testing and validation completed!
             
             ### Summary
             
             The following tests were executed:
-            - ✅ Meta Skills Validation
-            - ✅ Skill Functionality Testing  
-            - ✅ Performance Analysis
-            - ✅ Security Analysis
+            - [OK] Meta Skills Validation
+            - [OK] Skill Functionality Testing  
+            - [OK] Performance Analysis
+            - [OK] Security Analysis
             
             ### Detailed Results
             
