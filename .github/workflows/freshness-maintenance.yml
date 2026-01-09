@@ -1,0 +1,335 @@
+name: Freshness & Maintenance Checks
+
+on:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      force_update:
+        description: 'Force update stale content'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  check-freshness:
+    name: Check Content Freshness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check documentation freshness
+        id: freshness
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          from datetime import datetime, timedelta
+          import re
+          import json
+
+          today = datetime.now()
+          stale_threshold = timedelta(days=180)  # 6 months
+          outdated_threshold = timedelta(days=365)  # 1 year
+
+          issues = {
+              "stale": [],
+              "outdated": [],
+              "missing_dates": [],
+              "recommendations": []
+          }
+
+          # Check main documentation files
+          doc_files = ["README.md", "CONTRIBUTING.md", "CLAUDE.md"]
+
+          for doc_file in doc_files:
+              if not Path(doc_file).exists():
+                  continue
+
+              content = Path(doc_file).read_text(encoding='utf-8')
+
+              # Look for "Last updated" or "Updated" dates
+              date_pattern = r'(?:Last updated|Updated):\s*(\d{4}-\d{2}-\d{2})'
+              matches = re.findall(date_pattern, content)
+
+              if not matches:
+                  issues["missing_dates"].append(doc_file)
+              else:
+                  # Check most recent date
+                  latest_date = max(datetime.strptime(d, '%Y-%m-%d') for d in matches)
+                  age = today - latest_date
+
+                  if age > outdated_threshold:
+                      issues["outdated"].append({
+                          "file": doc_file,
+                          "date": latest_date.strftime('%Y-%m-%d'),
+                          "age_days": age.days
+                      })
+                  elif age > stale_threshold:
+                      issues["stale"].append({
+                          "file": doc_file,
+                          "date": latest_date.strftime('%Y-%m-%d'),
+                          "age_days": age.days
+                      })
+
+          # Check skill documentation
+          skill_files = list(Path("skills").rglob("*.md"))
+          skills_without_dates = []
+          stale_skills = []
+
+          for skill_file in skill_files:
+              content = skill_file.read_text(encoding='utf-8')
+
+              # Check frontmatter for last_updated
+              if content.startswith('---'):
+                  end_idx = content.find('---', 3)
+                  if end_idx > 0:
+                      frontmatter = content[3:end_idx]
+                      date_match = re.search(r'last_updated:\s*(\d{4}-\d{2}-\d{1,2})', frontmatter)
+
+                      if date_match:
+                          last_updated = datetime.strptime(date_match.group(1), '%Y-%m-%d')
+                          age = today - last_updated
+
+                          if age > stale_threshold:
+                              stale_skills.append({
+                                  "file": str(skill_file),
+                                  "date": last_updated.strftime('%Y-%m-%d'),
+                                  "age_days": age.days
+                              })
+                      else:
+                          skills_without_dates.append(str(skill_file))
+                  else:
+                      skills_without_dates.append(str(skill_file))
+              else:
+                  skills_without_dates.append(str(skill_file))
+
+          if skills_without_dates:
+              issues["missing_dates"].extend(skills_without_dates[:10])  # Limit to 10 examples
+
+          if stale_skills:
+              issues["stale"].extend(stale_skills[:10])  # Limit to 10 examples
+
+          # Generate recommendations
+          if issues["outdated"]:
+              issues["recommendations"].append("Consider updating outdated documentation (1+ year old)")
+
+          if issues["stale"]:
+              issues["recommendations"].append("Review stale content (6+ months old)")
+
+          if issues["missing_dates"]:
+              issues["recommendations"].append("Add 'last_updated' metadata to files missing dates")
+
+          # Save results
+          with open('freshness-report.json', 'w') as f:
+              json.dump(issues, f, indent=2)
+
+          # Print summary
+          print(f"📊 Freshness Check Results:")
+          print(f"   Outdated (1+ year): {len([x for x in issues['outdated'] if isinstance(x, dict)])}")
+          print(f"   Stale (6+ months): {len([x for x in issues['stale'] if isinstance(x, dict)])}")
+          print(f"   Missing dates: {len(issues['missing_dates'])}")
+
+          # Set output for next step
+          has_issues = bool(issues["outdated"] or issues["stale"] or issues["missing_dates"])
+          print(f"::set-output name=has_issues::{str(has_issues).lower()}")
+          EOF
+
+      - name: Check for broken internal links
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          import re
+
+          broken_links = []
+
+          md_files = list(Path(".").rglob("*.md"))
+
+          for md_file in md_files:
+              if '.github' in str(md_file) or 'node_modules' in str(md_file):
+                  continue
+
+              content = md_file.read_text(encoding='utf-8')
+
+              # Find markdown links [text](path)
+              link_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+              links = re.findall(link_pattern, content)
+
+              for link_text, link_path in links:
+                  # Skip external links
+                  if link_path.startswith(('http://', 'https://', '#', 'mailto:')):
+                      continue
+
+                  # Resolve relative path
+                  if link_path.startswith('/'):
+                      target = Path(link_path[1:])
+                  else:
+                      target = (md_file.parent / link_path).resolve()
+
+                  if not target.exists():
+                      broken_links.append({
+                          "file": str(md_file),
+                          "link": link_path,
+                          "text": link_text
+                      })
+
+          if broken_links:
+              print(f"⚠️ Found {len(broken_links)} broken internal links")
+              for link in broken_links[:20]:  # Show first 20
+                  print(f"   {link['file']}: {link['link']}")
+          else:
+              print("✅ No broken internal links found")
+          EOF
+
+      - name: Check for outdated dependencies
+        run: |
+          if [ -f "requirements.txt" ]; then
+            echo "📦 Checking Python dependencies..."
+            pip install pip-audit
+            pip-audit -r requirements.txt || echo "⚠️ Some dependencies have known vulnerabilities"
+          fi
+
+          if [ -f "package.json" ]; then
+            echo "📦 Checking Node.js dependencies..."
+            npm audit || echo "⚠️ Some dependencies have known vulnerabilities"
+          fi
+
+      - name: Generate freshness report
+        run: |
+          cat > FRESHNESS_REPORT.md << 'EOF'
+          # Repository Freshness Report
+
+          **Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          **Workflow**: Freshness & Maintenance Checks
+
+          ## Summary
+
+          This report identifies content that may need updating to maintain repository freshness.
+
+          EOF
+
+          if [ -f "freshness-report.json" ]; then
+            python3 << 'PYEOF'
+          import json
+
+          with open('freshness-report.json', 'r') as f:
+              data = json.load(f)
+
+          report = []
+          report.append("### Outdated Content (1+ year old)\n")
+          if data.get('outdated'):
+              for item in data['outdated']:
+                  if isinstance(item, dict):
+                      report.append(f"- `{item['file']}` - Last updated {item['date']} ({item['age_days']} days ago)")
+          else:
+              report.append("None found.\n")
+
+          report.append("\n### Stale Content (6+ months old)\n")
+          if data.get('stale'):
+              for item in data['stale']:
+                  if isinstance(item, dict):
+                      report.append(f"- `{item['file']}` - Last updated {item['date']} ({item['age_days']} days ago)")
+          else:
+              report.append("None found.\n")
+
+          report.append("\n### Missing Date Metadata\n")
+          if data.get('missing_dates'):
+              for file in data['missing_dates'][:15]:  # Limit output
+                  report.append(f"- `{file}`")
+              if len(data['missing_dates']) > 15:
+                  report.append(f"- ... and {len(data['missing_dates']) - 15} more")
+          else:
+              report.append("None found.\n")
+
+          report.append("\n### Recommendations\n")
+          if data.get('recommendations'):
+              for rec in data['recommendations']:
+                  report.append(f"- {rec}")
+          else:
+              report.append("- Repository content is fresh and up-to-date!")
+
+          with open('FRESHNESS_REPORT.md', 'a') as f:
+              f.write('\n'.join(report))
+          PYEOF
+          fi
+
+          echo "✅ Freshness report generated"
+
+      - name: Update maintenance metadata
+        if: github.event.inputs.force_update == 'true' || github.event_name == 'schedule'
+        run: |
+          # Update "Last checked" or "Last maintenance" timestamps
+          current_date=$(date -u +%Y-%m-%d)
+
+          # Update README if it has a maintenance section
+          if grep -q "Last maintenance check" README.md; then
+            sed -i "s/Last maintenance check: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Last maintenance check: $current_date/g" README.md
+            echo "✅ Updated maintenance timestamp in README.md"
+          fi
+
+      - name: Create issue for stale content
+        if: steps.freshness.outputs.has_issues == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('FRESHNESS_REPORT.md', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔄 Weekly Freshness Check: Stale Content Detected',
+              body: report + '\n\n---\n\nThis issue was automatically created by the Freshness & Maintenance workflow.',
+              labels: ['maintenance', 'documentation']
+            });
+
+      - name: Commit changes if any
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add FRESHNESS_REPORT.md README.md
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🤖 Weekly freshness check and maintenance
+
+          - Generated freshness report
+          - Updated maintenance timestamps
+
+          Automated by freshness-maintenance workflow"
+
+            git push origin HEAD:main
+            echo "✅ Changes committed"
+          fi
+
+      - name: Upload freshness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: freshness-report
+          path: |
+            FRESHNESS_REPORT.md
+            freshness-report.json
+
+      - name: Create maintenance summary
+        run: |
+          echo "## 🔍 Freshness Check Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat FRESHNESS_REPORT.md >> $GITHUB_STEP_SUMMARY

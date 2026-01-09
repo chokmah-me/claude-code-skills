@@ -1,0 +1,303 @@
+name: Snapshot State Manager
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC to archive snapshots
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - archive
+          - clean
+          - report
+        default: report
+
+permissions:
+  contents: write
+
+jobs:
+  manage-snapshots:
+    name: Manage Session Snapshots
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create snapshots archive directory
+        run: |
+          mkdir -p .snapshots/archive
+          mkdir -p .snapshots/reports
+
+      - name: Find and analyze snapshot files
+        id: analyze
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          from datetime import datetime
+          import re
+          import json
+
+          # Find all snapshot files
+          snapshot_files = list(Path(".").glob(".session-snapshot*.md"))
+          maintenance_files = list(Path(".").glob(".maintenance-snapshot*.md"))
+
+          all_snapshots = snapshot_files + maintenance_files
+
+          snapshot_data = []
+
+          for snapshot in all_snapshots:
+              if not snapshot.exists():
+                  continue
+
+              content = snapshot.read_text(encoding='utf-8')
+
+              # Extract timestamp
+              timestamp_match = re.search(r'Timestamp[:\s]+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})', content)
+              if timestamp_match:
+                  timestamp_str = timestamp_match.group(1)
+                  timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+              else:
+                  # Use file modification time
+                  timestamp = datetime.fromtimestamp(snapshot.stat().st_mtime)
+
+              # Extract task summary
+              task_match = re.search(r'Task[:\s]+(.+)', content)
+              task = task_match.group(1).strip() if task_match else "Unknown"
+
+              # Extract phase
+              phase_match = re.search(r'Phase[:\s]+(.+)', content)
+              phase = phase_match.group(1).strip() if phase_match else "Unknown"
+
+              snapshot_data.append({
+                  "file": str(snapshot),
+                  "name": snapshot.name,
+                  "timestamp": timestamp.isoformat(),
+                  "task": task,
+                  "phase": phase,
+                  "size": snapshot.stat().st_size,
+                  "age_days": (datetime.now() - timestamp).days
+              })
+
+          # Save analysis
+          with open('.snapshots/reports/snapshot-analysis.json', 'w') as f:
+              json.dump(snapshot_data, f, indent=2)
+
+          print(f"📊 Found {len(snapshot_data)} snapshot files")
+
+          for snap in sorted(snapshot_data, key=lambda x: x['age_days'], reverse=True):
+              print(f"   {snap['name']}: {snap['age_days']} days old - {snap['task'][:50]}")
+
+          # Set outputs
+          print(f"::set-output name=snapshot_count::{len(snapshot_data)}")
+          print(f"::set-output name=has_old_snapshots::{any(s['age_days'] > 30 for s in snapshot_data)}")
+          EOF
+
+      - name: Archive old snapshots
+        if: github.event.inputs.action == 'archive' || github.event_name == 'schedule'
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          from datetime import datetime
+          import json
+          import shutil
+
+          # Load analysis
+          with open('.snapshots/reports/snapshot-analysis.json', 'r') as f:
+              snapshots = json.load(f)
+
+          # Archive snapshots older than 30 days
+          archived_count = 0
+          for snap in snapshots:
+              if snap['age_days'] > 30:
+                  source = Path(snap['file'])
+                  if not source.exists():
+                      continue
+
+                  # Create archive filename with timestamp
+                  timestamp = snap['timestamp'].replace(':', '-').replace('T', '_')
+                  archive_name = f"{timestamp}_{source.name}"
+                  archive_path = Path('.snapshots/archive') / archive_name
+
+                  # Move to archive
+                  shutil.move(str(source), str(archive_path))
+                  archived_count += 1
+                  print(f"✅ Archived: {source.name} -> {archive_name}")
+
+          print(f"\n📦 Archived {archived_count} old snapshots")
+
+          # Create archive index
+          archive_files = list(Path('.snapshots/archive').glob('*.md'))
+          index = {
+              "last_updated": datetime.now().isoformat(),
+              "total_archived": len(archive_files),
+              "files": [{"name": f.name, "size": f.stat().st_size} for f in archive_files]
+          }
+
+          with open('.snapshots/archive/INDEX.json', 'w') as f:
+              json.dump(index, f, indent=2)
+          EOF
+
+      - name: Clean old archived snapshots
+        if: github.event.inputs.action == 'clean'
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          from datetime import datetime, timedelta
+
+          # Remove archived snapshots older than 90 days
+          archive_dir = Path('.snapshots/archive')
+          cutoff_date = datetime.now() - timedelta(days=90)
+
+          removed_count = 0
+          for archive_file in archive_dir.glob('*.md'):
+              file_date = datetime.fromtimestamp(archive_file.stat().st_mtime)
+              if file_date < cutoff_date:
+                  archive_file.unlink()
+                  removed_count += 1
+                  print(f"🗑️ Removed old archive: {archive_file.name}")
+
+          print(f"\n🗑️ Removed {removed_count} old archived snapshots (>90 days)")
+          EOF
+
+      - name: Generate snapshot report
+        run: |
+          python3 << 'EOF'
+          from pathlib import Path
+          from datetime import datetime
+          import json
+
+          # Load analysis
+          try:
+              with open('.snapshots/reports/snapshot-analysis.json', 'r') as f:
+                  snapshots = json.load(f)
+          except FileNotFoundError:
+              snapshots = []
+
+          # Load archive index
+          try:
+              with open('.snapshots/archive/INDEX.json', 'r') as f:
+                  archive_index = json.load(f)
+          except FileNotFoundError:
+              archive_index = {"total_archived": 0, "files": []}
+
+          # Generate report
+          report = [
+              "# Session Snapshot State Report",
+              "",
+              f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+              f"**Workflow**: Snapshot State Manager",
+              "",
+              "## Summary",
+              "",
+              f"- **Active Snapshots**: {len(snapshots)}",
+              f"- **Archived Snapshots**: {archive_index['total_archived']}",
+              f"- **Total Storage**: {sum(s['size'] for s in snapshots) + sum(f['size'] for f in archive_index['files'])} bytes",
+              "",
+              "## Active Snapshots",
+              ""
+          ]
+
+          if snapshots:
+              report.append("| File | Age (days) | Task | Phase |")
+              report.append("|------|------------|------|-------|")
+              for snap in sorted(snapshots, key=lambda x: x['age_days'], reverse=True):
+                  task_short = snap['task'][:40] + '...' if len(snap['task']) > 40 else snap['task']
+                  phase_short = snap['phase'][:30] + '...' if len(snap['phase']) > 30 else snap['phase']
+                  report.append(f"| `{snap['name']}` | {snap['age_days']} | {task_short} | {phase_short} |")
+          else:
+              report.append("No active snapshots found.")
+
+          report.extend([
+              "",
+              "## Archived Snapshots",
+              "",
+              f"Total archived: {archive_index['total_archived']}",
+              "",
+              "Archive location: `.snapshots/archive/`",
+              "",
+              "## Recommendations",
+              ""
+          ])
+
+          # Generate recommendations
+          old_snapshots = [s for s in snapshots if s['age_days'] > 30]
+          if old_snapshots:
+              report.append(f"- ⚠️ {len(old_snapshots)} snapshots are older than 30 days and could be archived")
+
+          stale_snapshots = [s for s in snapshots if s['age_days'] > 7]
+          if stale_snapshots:
+              report.append(f"- ℹ️ {len(stale_snapshots)} snapshots are older than 7 days - consider reviewing")
+
+          if not snapshots:
+              report.append("- ✅ No active snapshots - system is clean")
+
+          report.extend([
+              "",
+              "## Maintenance Actions",
+              "",
+              "- **Archive**: Snapshots older than 30 days are automatically archived",
+              "- **Clean**: Archived snapshots older than 90 days are automatically removed",
+              "- **Schedule**: This workflow runs daily at 00:00 UTC",
+              "",
+              "---",
+              "*Generated by snapshot-state-manager workflow*"
+          ])
+
+          # Write report
+          report_path = Path('.snapshots/reports/SNAPSHOT_REPORT.md')
+          report_path.write_text('\n'.join(report), encoding='utf-8')
+
+          print("✅ Generated snapshot report")
+          EOF
+
+      - name: Update .gitignore for snapshots
+        run: |
+          # Ensure snapshot directories are in .gitignore
+          if ! grep -q ".snapshots/" .gitignore 2>/dev/null; then
+            echo "" >> .gitignore
+            echo "# Session snapshot archives and reports" >> .gitignore
+            echo ".snapshots/" >> .gitignore
+            echo ".session-snapshot*.md" >> .gitignore
+            echo ".maintenance-snapshot*.md" >> .gitignore
+            echo "✅ Updated .gitignore"
+          fi
+
+      - name: Create GitHub issue for old snapshots
+        if: steps.analyze.outputs.has_old_snapshots == 'true' && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('.snapshots/reports/SNAPSHOT_REPORT.md', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '📸 Snapshot State: Old Snapshots Detected',
+              body: report + '\n\n---\n\nThis issue was automatically created by the Snapshot State Manager workflow.',
+              labels: ['maintenance', 'automation']
+            });
+
+      - name: Upload snapshot report
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-report
+          path: .snapshots/reports/
+
+      - name: Create workflow summary
+        run: |
+          echo "## 📸 Snapshot State Management" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat .snapshots/reports/SNAPSHOT_REPORT.md >> $GITHUB_STEP_SUMMARY

@@ -14,6 +14,12 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import argparse
 
+# Fix Unicode encoding issues on Windows
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 
 class SkillValidator:
     """Validates Claude Code skills for structure and quality."""

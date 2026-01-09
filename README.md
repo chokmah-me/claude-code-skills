@@ -144,13 +144,35 @@ If a skill consistently exceeds 3000 tokens, consider splitting it.
 
 ## Maintenance
 
-### Automated Validation
-This repository uses GitHub Actions to automatically validate skill templates. The workflow:
-- ✅ Runs on every pull request affecting skills
-- ✅ Validates SKILL.md structure and required sections
-- ✅ Checks for proper documentation and examples
-- ✅ Ensures token efficiency considerations
-- ✅ Provides detailed validation reports
+### Automated Workflows
+
+This repository uses comprehensive GitHub Actions automation:
+
+**Validation & Quality**:
+- ✅ **skill-template-validator** - Validates SKILL.md structure on every PR
+- ✅ **readme-auto-update** - Auto-generates skills inventory
+
+**Release Automation**:
+- ✅ **post-tag-maintenance** - After tagging a release:
+  - Updates date references in all documentation
+  - Generates CHANGELOG.md entry
+  - Creates/updates sitemap.xml
+  - Updates skill metadata with version info
+  - Commits changes back to main branch
+
+**Repository Health**:
+- ✅ **freshness-maintenance** - Weekly checks (Mondays 00:00 UTC):
+  - Identifies stale content (6+ months old)
+  - Detects outdated documentation (1+ year old)
+  - Checks for broken internal links
+  - Creates GitHub issues for attention needed
+
+**State Management**:
+- ✅ **snapshot-state-manager** - Daily snapshot management (00:00 UTC):
+  - Archives session snapshots older than 30 days
+  - Cleans archived snapshots older than 90 days
+  - Generates snapshot state reports
+  - Maintains snapshot inventory
 
 ### Old Flat Structure
 The old flat structure still exists in `~/.claude/skills/` root:
