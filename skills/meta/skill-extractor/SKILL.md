@@ -1,3 +1,8 @@
+---
+name: skill-extractor
+description: Analyze extended Claude Code sessions to identify recurring workflows and extract them as reusable skills
+---
+
 # Skill Extractor Meta-Skill
 
 ## Purpose
