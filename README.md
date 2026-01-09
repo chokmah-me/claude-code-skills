@@ -183,13 +183,13 @@ When you discover a useful workflow:
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-09 01:54 UTC*
+*Last updated: 2026-01-09 02:35 UTC*
 
-**Total Skills:** 14  
+**Total Skills:** 15  
 **Categories:** 4  
 **Skills with README:** 12  
 
-### Analysis (2 skills)
+### Analysis (3 skills)
 
 #### Code
 **Location:** `skills/analysis/code/`  
@@ -197,6 +197,10 @@ When you discover a useful workflow:
 
 #### Formal
 **Location:** `skills/analysis/formal/`  
+**Documentation:** No README  
+
+#### Quantum
+**Location:** `skills/analysis/quantum/`  
 **Documentation:** No README  
 
 ### Development (3 skills)
