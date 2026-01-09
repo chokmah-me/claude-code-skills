@@ -1,8 +1,35 @@
 # Claude Code Skills Directory
 
 [![Skill Template Validator](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml)
+[![README Auto-Update](https://github.com/chokmah-me/claude-code-skills/actions/workflows/readme-auto-update.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/readme-auto-update.yml)
+[![Freshness Maintenance](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml)
+[![Snapshot State Manager](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml)
 
-Hierarchical organization of reusable Claude Code workflows and procedures.
+**20 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
+
+## 🚀 Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/chokmah-me/claude-code-skills.git
+cd claude-code-skills
+
+# Install all skills
+python install.py --all
+
+# Verify installation
+python install.py --verify
+
+# Start using skills in Claude Code
+/repo-briefing
+/lean-plan
+```
+
+## 📋 Prerequisites
+
+- **Python 3.8+** - For installation and validation scripts
+- **Claude Code CLI** or **claude.ai Projects** - To use the skills
+- **Git** - For repository operations
 
 ## Directory Structure
 
@@ -146,19 +173,11 @@ If a skill consistently exceeds 3000 tokens, consider splitting it.
 
 ### Automated Workflows
 
-This repository uses comprehensive GitHub Actions automation:
+This repository uses GitHub Actions automation for quality and maintenance:
 
 **Validation & Quality**:
 - ✅ **skill-template-validator** - Validates SKILL.md structure on every PR
-- ✅ **readme-auto-update** - Auto-generates skills inventory
-
-**Release Automation**:
-- ✅ **post-tag-maintenance** - After tagging a release:
-  - Updates date references in all documentation
-  - Generates CHANGELOG.md entry
-  - Creates/updates sitemap.xml
-  - Updates skill metadata with version info
-  - Commits changes back to main branch
+- ✅ **readme-auto-update** - Auto-generates skills inventory weekly and on changes
 
 **Repository Health**:
 - ✅ **freshness-maintenance** - Weekly checks (Mondays 00:00 UTC):
