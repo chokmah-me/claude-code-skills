@@ -178,6 +178,12 @@ class SkillInstaller:
                         "description": "Analyze proof tactics usage patterns",
                         "priority": "low",
                         "dependencies": []
+                    },
+                    "quantum-circuit-optimizer": {
+                        "file": "skills/analysis/quantum/quantum-circuit-optimizer/SKILL.md",
+                        "description": "Optimize quantum circuits by reducing gate count and depth",
+                        "priority": "medium",
+                        "dependencies": []
                     }
                 }
             }

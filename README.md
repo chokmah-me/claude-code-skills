@@ -13,11 +13,13 @@ Hierarchical organization of reusable Claude Code workflows and procedures.
 │   │   ├── api-contract-sniffer/
 │   │   ├── dead-code-hunter/
 │   │   └── dependency-audit/
-│   └── formal/           # Formal verification (Coq/proof systems)
-│       ├── anti-pattern-sniffer/
-│       ├── lemma-dependency-graph/
-│       ├── proof-obligations-snapshot/
-│       └── tactic-usage-count/
+│   ├── formal/           # Formal verification (Coq/proof systems)
+│   │   ├── anti-pattern-sniffer/
+│   │   ├── lemma-dependency-graph/
+│   │   ├── proof-obligations-snapshot/
+│   │   └── tactic-usage-count/
+│   └── quantum/          # Quantum computing optimization
+│       └── quantum-circuit-optimizer/
 ├── development/          # Active development workflows
 │   ├── lean-plan/        # Token-efficient planning mode
 │   ├── quick-test-runner/
@@ -51,6 +53,11 @@ Hierarchical organization of reusable Claude Code workflows and procedures.
 - `lemma-dependency-graph` - Visualize proof dependencies
 - `proof-obligations-snapshot` - Track unproven obligations
 - `tactic-usage-count` - Analyze proof tactics
+
+### analysis/quantum
+**Purpose**: Quantum computing circuit analysis and optimization
+
+- `quantum-circuit-optimizer` - Optimize quantum circuits by reducing gate count and depth
 
 ### development
 **Purpose**: Active coding and refactoring workflows
