@@ -161,50 +161,30 @@ jobs:
                   return markdown
               
               def update_readme(self):
-                  '''Update README.md with skills inventory'''
-                  readme_path = Path('README.md')
-                  if not readme_path.exists():
-                      print('❌ README.md not found')
-                      return False
-                  
+                  '''Update SKILLS_INVENTORY.md with skills inventory'''
+                  inventory_path = Path('SKILLS_INVENTORY.md')
+
                   try:
-                      with open(readme_path, 'r', encoding='utf-8') as f:
-                          content = f.read()
-                      
-                      # Find skills inventory markers
-                      start_marker = '<!-- SKILLS_INVENTORY_START -->'
-                      end_marker = '<!-- SKILLS_INVENTORY_END -->'
-                      
-                      if start_marker not in content or end_marker not in content:
-                          print('❌ Skills inventory markers not found in README.md')
-                          print('Please add these markers to your README.md:')
-                          print(f'{start_marker}')
-                          print(f'{end_marker}')
-                          return False
-                      
                       # Generate new inventory
                       self.scan_skills()
                       inventory_markdown = self.generate_inventory_markdown()
-                      
-                      # Replace content between markers
-                      start_idx = content.find(start_marker) + len(start_marker)
-                      end_idx = content.find(end_marker)
-                      
-                      new_content = (
-                          content[:start_idx] +
-                          '\n' + inventory_markdown.strip() + '\n' +
-                          content[end_idx:]
+
+                      # Add markers for consistency
+                      content = (
+                          '<!-- SKILLS_INVENTORY_START -->\n' +
+                          inventory_markdown.strip() + '\n' +
+                          '<!-- SKILLS_INVENTORY_END -->\n'
                       )
-                      
-                      # Write updated README
-                      with open(readme_path, 'w', encoding='utf-8') as f:
-                          f.write(new_content)
-                      
-                      print('✅ README.md updated successfully')
+
+                      # Write inventory file
+                      with open(inventory_path, 'w', encoding='utf-8') as f:
+                          f.write(content)
+
+                      print('✅ SKILLS_INVENTORY.md updated successfully')
                       return True
-                      
+
                   except Exception as e:
-                      print(f'❌ Error updating README.md: {e}')
+                      print(f'❌ Error updating SKILLS_INVENTORY.md: {e}')
                       return False
           
           # Run the updater
@@ -234,8 +214,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add README.md
-          git commit -m "🤖 Auto-update README with skills inventory
+          git add SKILLS_INVENTORY.md
+          git commit -m "🤖 Auto-update SKILLS_INVENTORY.md with skills inventory
 
           - Updated skills inventory
           - Generated on: $(date -u '+%Y-%m-%d %H:%M UTC')
