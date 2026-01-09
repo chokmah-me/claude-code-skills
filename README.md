@@ -1,5 +1,7 @@
 # Claude Code Skills Directory
 
+[![Skill Template Validator](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml)
+
 Hierarchical organization of reusable Claude Code workflows and procedures.
 
 ## Directory Structure
