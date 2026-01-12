@@ -1,0 +1,62 @@
+name: ASCII Sanitizer
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  check-ascii:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Scan for non-ASCII characters
+        run: |
+          echo "Scanning for unsafe Unicode characters..."
+
+          # Find all relevant files
+          FILES=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.py" -o -name "*.md" -o -name "*.sh" -o -name "*.json" \) -not -path "./.git/*" -not -path "./venv/*" -not -path "./node_modules/*")
+
+          VIOLATIONS_FOUND=0
+
+          echo ""
+          echo "=========================================="
+          echo "Checking files for non-ASCII characters..."
+          echo "=========================================="
+          echo ""
+
+          for file in $FILES; do
+            if grep -Pn '[^\x00-\x7F]' "$file" > /dev/null 2>&1; then
+              echo "VIOLATION: $file"
+              grep -Pn '[^\x00-\x7F]' "$file" | head -5
+              echo ""
+              VIOLATIONS_FOUND=1
+            fi
+          done
+
+          if [ "$VIOLATIONS_FOUND" -eq 1 ]; then
+            echo ""
+            echo "=========================================="
+            echo "ERROR: Non-ASCII characters detected!"
+            echo "=========================================="
+            echo ""
+            echo "Files contain unsafe Unicode characters (emojis, smart quotes, etc.)"
+            echo "that may break YAML parsers and GitHub Actions workflows."
+            echo ""
+            echo "Common fixes:"
+            echo "  - Replace smart quotes with straight quotes: sed 's/[\"\"]/\"/g'"
+            echo "  - Replace smart apostrophes: sed 's/['\'\']/'/g'"
+            echo "  - Remove emojis: sed 's/[^\\x00-\\x7F]//g'"
+            echo ""
+            echo "See skills/analysis/code/ascii-sanitizer/SKILL.md for detailed guidance."
+            echo ""
+            exit 1
+          fi
+
+          echo ""
+          echo "=========================================="
+          echo "SUCCESS: All files are ASCII-safe!"
+          echo "=========================================="
+          echo ""

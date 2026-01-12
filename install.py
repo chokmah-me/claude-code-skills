@@ -161,6 +161,12 @@ class SkillInstaller:
                         "priority": "high",
                         "dependencies": []
                     },
+                    "ascii-sanitizer": {
+                        "file": "skills/analysis/code/ascii-sanitizer/SKILL.md",
+                        "description": "Detect and remove unsafe Unicode/emoji characters",
+                        "priority": "medium",
+                        "dependencies": []
+                    },
                     "anti-pattern-sniffer": {
                         "file": "skills/analysis/formal/anti-pattern-sniffer/SKILL.md",
                         "description": "Detect proof anti-patterns in formal verification",
