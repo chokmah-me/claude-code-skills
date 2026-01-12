@@ -5,7 +5,7 @@
 [![Freshness Maintenance](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml)
 [![Snapshot State Manager](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml)
 
-**20 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
+**21 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
 
 ## 🚀 Quick Start
 
@@ -38,6 +38,7 @@ python install.py --verify
 ├── analysis/              # Code and codebase inspection
 │   ├── code/             # General software analysis
 │   │   ├── api-contract-sniffer/
+│   │   ├── ascii-sanitizer/
 │   │   ├── dead-code-hunter/
 │   │   └── dependency-audit/
 │   ├── formal/           # Formal verification (Coq/proof systems)
@@ -70,6 +71,7 @@ python install.py --verify
 **Purpose**: Inspect codebases for quality, security, and maintainability issues
 
 - `api-contract-sniffer` - Detect API contract violations
+- `ascii-sanitizer` - Detect and remove unsafe Unicode/emoji characters that break YAML and CI/CD
 - `dead-code-hunter` - Find unused functions/imports
 - `dependency-audit` - Check for outdated/vulnerable dependencies
 
