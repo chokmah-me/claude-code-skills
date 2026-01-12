@@ -42,7 +42,7 @@
 **Primary Technologies**:
 - Languages: [Python 3.9, Node.js 18, TypeScript 4.8]
 - Frameworks: [React 18, Django 4.1, Express 4.18]
-- Tools: [Git 2.38, npm 9.5, VS Code 1.72]
+- Tools: [Git 2.38, Docker 20.10, VS Code 1.72]
 
 **Project Structure**:
 ```

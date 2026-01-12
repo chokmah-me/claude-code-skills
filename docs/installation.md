@@ -31,6 +31,7 @@ Comprehensive installation guide for the Claude Code Skills ecosystem.
 
 - **Git**: For version control integration
 - **GitHub CLI**: For advanced GitHub features
+- **Docker**: For containerized skill execution
 
 ## Quick Installation
 
@@ -330,6 +331,32 @@ claude skills use session-snapshot --help
 - Use package manager Python or pyenv
 - Ensure pip is available
 - Consider virtual environments
+
+## Docker Installation
+
+### Using Pre-built Image
+
+```bash
+# Pull the official image
+docker pull chokmah/claude-code-skills:latest
+
+# Run installation
+docker run -v ~/.claude/skills:/skills chokmah/claude-code-skills:latest install --all
+```
+
+### Building Custom Image
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY . .
+
+RUN pip install -r requirements.txt
+RUN python install.py --all
+
+CMD ["python", "install.py", "--verify"]
+```
 
 ## Troubleshooting
 

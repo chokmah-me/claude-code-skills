@@ -424,7 +424,7 @@ jobs:
       - name: Configure deployment credentials
         run: |
           echo "🔐 Configuring deployment credentials..."
-          # Setup kubeconfig, cloud credentials, etc.
+          # Setup kubeconfig, docker credentials, etc.
 
       - name: Execute deployment strategy
         id: deploy
