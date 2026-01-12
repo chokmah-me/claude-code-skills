@@ -37,11 +37,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml
 
-      - name: Create README update script
+      - name: Run README update script
         run: |
-          cat > update_readme.py << 'EOF'
+          python .github/scripts/update_readme.py
+
+      - name: Placeholder for old inline script (removed)
+        if: false
+        run: |
+          cat > /dev/null << 'EOF'
           import json
           import re
           from pathlib import Path
@@ -193,11 +197,6 @@ jobs:
           exit(0 if success else 1)
           EOF
 
-      - name: Run README update script
-        run: |
-          echo "📋 Running README update script..."
-          python update_readme.py
-
       - name: Check for changes
         id: changes
         run: |
@@ -214,23 +213,17 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add SKILLS_INVENTORY.md
-          git commit -m "🤖 Auto-update SKILLS_INVENTORY.md with skills inventory
+          git add SKILLS_INVENTORY.md README.md
 
-          - Updated skills inventory
+          # Get skill count from the updated SKILLS_INVENTORY.md
+          SKILL_COUNT=$(grep "Total Skills:" SKILLS_INVENTORY.md | grep -oP '\d+')
+
+          git commit -m "🤖 Auto-update skills inventory and README timestamp
+
+          - Updated SKILLS_INVENTORY.md with current skills
+          - Updated README.md timestamp
           - Generated on: $(date -u '+%Y-%m-%d %H:%M UTC')
-          - Total skills: $(python3 -c "
-          import json
-          from pathlib import Path
-          skills_count = 0
-          for p in ['skills', '.claude/skills']:
-              path = Path(p)
-              if path.exists():
-                  for cat in path.iterdir():
-                      if cat.is_dir() and not cat.name.startswith('.'):
-                          skills_count += len([s for s in cat.iterdir() if s.is_dir() and not s.name.startswith('.')])
-          print(skills_count)
-          ")
+          - Total skills: ${SKILL_COUNT}
           "
           git push
 
