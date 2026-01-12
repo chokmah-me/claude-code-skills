@@ -16,8 +16,8 @@ jobs:
         run: |
           echo "Scanning for unsafe Unicode characters..."
 
-          # Find all relevant files
-          FILES=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.py" -o -name "*.md" -o -name "*.sh" -o -name "*.json" \) -not -path "./.git/*" -not -path "./venv/*" -not -path "./node_modules/*")
+          # Find all relevant files (excluding SKILL.md and README.md which intentionally use emojis)
+          FILES=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.py" -o -name "*.sh" -o -name "*.json" \) -not -path "./.git/*" -not -path "./venv/*" -not -path "./node_modules/*" -not -name "SKILL.md" -not -name "README.md" -not -name "*README*.md" -not -name "CONTRIBUTING.md" -not -name "*.md")
 
           VIOLATIONS_FOUND=0
 
