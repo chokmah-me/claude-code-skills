@@ -1,9 +1,14 @@
 name: ASCII Sanitizer
 
+# DISABLED: This repository intentionally uses Unicode/emojis in documentation and code.
+# This workflow is provided as a template for other repositories that want ASCII-only enforcement.
+# To enable in your repo, remove the workflow_dispatch trigger and uncomment the triggers below.
+
 on:
-  pull_request:
-  push:
-    branches: [main, master]
+  workflow_dispatch:  # Manual trigger only
+  # pull_request:
+  # push:
+  #   branches: [main, master]
 
 jobs:
   check-ascii:
