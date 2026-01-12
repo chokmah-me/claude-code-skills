@@ -52,7 +52,7 @@ The `dependency-audit` skill analyzes project dependencies to identify security 
 Identifies all dependency sources:
 - Package manager files (`package.json`, `requirements.txt`, etc.)
 - Lock files (`package-lock.json`, `Pipfile.lock`, etc.)
-- Container dependencies (`Dockerfile`, `docker-compose.yml`)
+- Build configuration (`pyproject.toml`, `setup.py`, etc.)
 - CI/CD dependencies (`.github/workflows`, etc.)
 
 ### Phase 2: Security Scanning

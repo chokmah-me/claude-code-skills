@@ -97,7 +97,7 @@ Backend: Flask 2.0, SQLAlchemy, Redis, Celery
 Frontend: React 18, TypeScript, Material-UI
 ML/AI: scikit-learn, TensorFlow, PyTorch
 Database: PostgreSQL, Redis (caching)
-Infrastructure: Docker, Kubernetes, AWS
+Infrastructure: Cloud deployment (AWS/GCP)
 
 📈 Development Activity:
 - Active development: High (15 commits/week)
@@ -119,7 +119,7 @@ Overall Quality: 7.5/10 (Good)
 4. Performance monitoring: Basic implementation
 
 🚀 Getting Started:
-1. Setup: `docker-compose up` (well documented)
+1. Setup: Follow installation guide in README.md
 2. Tests: `pytest` (comprehensive test suite)
 3. Frontend: `npm start` (standard React setup)
 4. Database: PostgreSQL required (setup script provided)
@@ -242,7 +242,7 @@ Claude: 📊 Analyzing technology stack and choices...
 🏗️ Architecture Overview:
 - Pattern: Microservices architecture
 - Communication: REST APIs + Message queue
-- Deployment: Containerized (Docker + Kubernetes)
+- Deployment: Cloud-native deployment
 - Cloud: AWS-native services
 
 💻 Backend Technologies:
@@ -260,8 +260,7 @@ Build Tool: Vite 5
 Testing: Jest + React Testing Library
 
 🔧 Infrastructure & DevOps:
-Container: Docker with multi-stage builds
-Orchestration: Kubernetes (EKS)
+Cloud Platform: AWS (EKS)
 CI/CD: GitHub Actions
 Monitoring: Prometheus + Grafana
 Logging: ELK Stack (Elasticsearch, Logstash, Kibana)

@@ -129,7 +129,6 @@ claude-code-skills/
 - ✅ Multiple installation methods
 - ✅ Troubleshooting and common issues
 - ✅ Advanced configuration options
-- ✅ Docker support and containerization
 
 #### Community Contribution Framework
 - ✅ Comprehensive contributing guidelines

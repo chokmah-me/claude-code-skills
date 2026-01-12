@@ -17,7 +17,7 @@
 **Technologies Mentioned**:
 - Languages: [e.g., Python, JavaScript, TypeScript]
 - Frameworks: [e.g., React, Django, Express]
-- Tools: [e.g., Git, Docker, AWS]
+- Tools: [e.g., Git, npm, AWS]
 
 **Task Indicators**:
 - Development Phase: [Planning, Coding, Testing, Debugging, Deployment]
@@ -30,7 +30,7 @@
 **Project Type Indicators**:
 - File Extensions: [`.py`, `.js`, `.ts`, `.md`, `.json`, `.yml`]
 - Directory Structure: [Web app, API, Library, Data analysis, etc.]
-- Configuration Files: [`package.json`, `requirements.txt`, `Dockerfile`, etc.]
+- Configuration Files: [`package.json`, `requirements.txt`, `pyproject.toml`, etc.]
 
 **Code Patterns Observed**:
 - [Pattern 1: e.g., REST API endpoints]
