@@ -1,9 +1,0 @@
-name: Test Unicode Detection 🚀
-description: "This file has smart quotes for testing"
-version: 1.0.0
-author: Test User
-features:
-  - Fast processing
-  - Easy to use…
-  - Modern design
-notes: This should trigger the ASCII sanitizer workflow!
