@@ -114,6 +114,12 @@ class SkillInstaller:
                         "description": "Code restructuring and modernization workflows",
                         "priority": "medium",
                         "dependencies": []
+                    },
+                    "matarao": {
+                        "file": "skills/development/matarao/SKILL.md",
+                        "description": "Publish and manage blog posts on Mataroa via API",
+                        "priority": "medium",
+                        "dependencies": []
                     }
                 }
             },
