@@ -1,9 +1,9 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-13 09:25 UTC*
+*Last updated: 2026-01-13 19:25 UTC*
 
-**Total Skills:** 21  
+**Total Skills:** 22  
 **Categories:** 6  
 **Skills with README:** 20  
 
@@ -85,7 +85,7 @@ Optimize quantum circuits by reducing gate count, depth, and identifying optimiz
 **Location:** `skills/analysis/quantum/quantum-circuit-optimizer/`  
 **Documentation:** [README](skills/analysis/quantum/quantum-circuit-optimizer/README.md)  
 
-### Development (3 skills)
+### Development (4 skills)
 
 #### Lean Plan
 Enter token-efficient planning mode. Load ≤2k-token repo snapshot, adopt guard-rail persona, and produce concise checklist plans. Use when user says "start planning mode" or "plan this feature".
@@ -94,6 +94,14 @@ Enter token-efficient planning mode. Load ≤2k-token repo snapshot, adopt guard
 
 **Location:** `skills/development/lean-plan/`  
 **Documentation:** [README](skills/development/lean-plan/README.md)  
+
+#### Matarao
+Publish and manage blog posts on Mataroa via API. Create, update, and retrieve posts from URLs or local files. Use when user says "publish to mataroa", "update blog post", or "fetch mataroa post".
+
+**Purpose:** Manage Mataroa blog posts directly from Claude Code without leaving your terminal. Publish from local markdown files or URLs, update existing posts, and retrieve content for editing (~700 tokens per operation vs 3000+ manual).
+
+**Location:** `skills/development/matarao/`  
+**Documentation:** No README  
 
 #### Quick Test Runner
 Run tests impacted by recent changes and show last 20 lines of output. Use when user says "run impacted tests", "test my changes", or "did I break anything".
