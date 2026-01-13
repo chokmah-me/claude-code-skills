@@ -1,0 +1,7 @@
+# User-specific data files
+preferences.json
+feedback_history.json
+
+# Exclude example/template files (if any)
+!.gitignore
+!*.example.json
