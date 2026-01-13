@@ -221,7 +221,7 @@ When you discover a useful workflow:
 
 ---
 
-**Last updated**: 2026-01-12 (Auto-updated by workflow)
+**Last updated**: 2026-01-13 (Auto-updated by workflow)
 
 <!-- SKILLS_INVENTORY_START -->
 See [SKILLS_INVENTORY.md](SKILLS_INVENTORY.md) for complete skill details.
