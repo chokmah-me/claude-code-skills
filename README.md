@@ -25,6 +25,68 @@ python install.py --verify
 /lean-plan
 ```
 
+## 🎯 Getting Started
+
+### First-Time Setup
+1. Install all skills: `python install.py --all`
+2. Verify installation: `python install.py --verify`
+3. Launch Claude Code in any project
+
+### Discovering Your Skills
+
+When starting a new session, invoke the startup integration:
+```
+/claude-startup-integration
+```
+
+This displays your complete skill ecosystem with:
+- **Featured meta-skills** for productivity (session-snapshot, skill-extractor, startup-skill-showcase)
+- **Quick-access skills** for daily tasks (lean-plan, quick-test-runner, diff-summariser, repo-briefing)
+- **Intelligent recommendations** based on your current context
+- **Interactive discovery** commands to explore capabilities
+
+### Common Workflows
+
+**Publish blog post**:
+```bash
+"Publish article.md to my Mataroa blog"  # Uses /matarao
+```
+
+**Plan complex task**:
+```bash
+"Create a lean plan for adding authentication"  # Uses /lean-plan
+```
+
+**Save session progress**:
+```bash
+"Save a snapshot of this session"  # Uses /session-snapshot
+```
+
+**Review changes**:
+```bash
+"Summarize the changes in this PR"  # Uses /diff-summariser
+```
+
+**Get repository overview**:
+```bash
+"Brief me on this repo"  # Uses /repo-briefing
+```
+
+### Configuration
+
+The startup integration can be configured via `~/.claude/startup-config.json`:
+
+```json
+{
+  "auto_display_on_startup": true,
+  "display_mode": "full",
+  "featured_skills": {
+    "meta": ["session-snapshot", "skill-extractor", "startup-skill-showcase"],
+    "quick_access": ["lean-plan", "quick-test-runner", "diff-summariser", "repo-briefing"]
+  }
+}
+```
+
 ## 📋 Prerequisites
 
 - **Python 3.8+** - For installation and validation scripts
@@ -50,6 +112,7 @@ python install.py --verify
 │       └── quantum-circuit-optimizer/
 ├── development/          # Active development workflows
 │   ├── lean-plan/        # Token-efficient planning mode
+│   ├── matarao/          # Mataroa blog publishing API
 │   ├── quick-test-runner/
 │   └── refactoring/      # Code restructuring workflows
 ├── git/                  # Version control operations
@@ -92,6 +155,7 @@ python install.py --verify
 **Purpose**: Active coding and refactoring workflows
 
 - `lean-plan` - Token-efficient planning mode
+- `matarao` - Publish and manage blog posts on Mataroa via API
 - `quick-test-runner` - Fast test execution workflows
 - `refactoring` - Code restructuring procedures
 
