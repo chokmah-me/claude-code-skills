@@ -5,7 +5,7 @@
 [![Freshness Maintenance](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml)
 [![Snapshot State Manager](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml)
 
-**21 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
+**22 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
 
 ## 🚀 Quick Start
 

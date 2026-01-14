@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is **claude-code-skills**, a collection of 19+ proven Claude Code skills organized hierarchically by category (meta, development, git, analysis). The repository includes installation tools, validation frameworks, and templates for creating new skills.
+This is **claude-code-skills**, a collection of 22 production-ready Claude Code skills organized hierarchically by category (meta, development, git, analysis). The repository includes installation tools, validation frameworks, and templates for creating new skills.
 
 ## Commands Reference
 
@@ -69,24 +69,28 @@ skills/
 │   ├── claude-startup-integration/
 │   ├── startup-skill-showcase/
 │   └── manifest-generator/
-├── development/                   # 3 development skills
+├── development/                   # 4 development skills
 │   ├── lean-plan/
 │   ├── quick-test-runner/
-│   └── refactoring/
+│   ├── refactoring/
+│   └── matarao/                   # Mataroa blog publishing
 ├── git/                           # 3 git skills
 │   ├── diff-summariser/
 │   ├── migrate-repo/
 │   └── repo-briefing/
-└── analysis/                      # 8 analysis skills
+└── analysis/                      # 9 analysis skills
     ├── code/                      # General code analysis
     │   ├── api-contract-sniffer/
+    │   ├── ascii-sanitizer/       # Unicode/emoji sanitization
     │   ├── dead-code-hunter/
     │   └── dependency-audit/
-    └── formal/                    # Formal verification (Coq/proof systems)
-        ├── anti-pattern-sniffer/
-        ├── lemma-dependency-graph/
-        ├── proof-obligations-snapshot/
-        └── tactic-usage-count/
+    ├── formal/                    # Formal verification (Coq/proof systems)
+    │   ├── anti-pattern-sniffer/
+    │   ├── lemma-dependency-graph/
+    │   ├── proof-obligations-snapshot/
+    │   └── tactic-usage-count/
+    └── quantum/                   # Quantum computing
+        └── quantum-circuit-optimizer/
 ```
 
 ### Skill Structure Standard
