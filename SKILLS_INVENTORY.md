@@ -1,7 +1,7 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-15 22:52 UTC*
+*Last updated: 2026-01-15 22:59 UTC*
 
 **Total Skills:** 22  
 **Categories:** 6  
@@ -36,7 +36,7 @@ Find potentially unused functions, classes, and exports by comparing declaration
 #### Dependency Audit
 List top-level runtime dependencies from package.json, requirements.txt, or other lock files. Use when user says "audit deps", "check dependencies", or "what packages do we use".
 
-**Purpose:** Get runtime dependency list without parsing full lockfiles (~600 tokens).
+**Purpose:** List runtime dependencies with version numbers across multiple languages and package managers. Automatically detects dependency files and provides package count statistics for quick security audits.
 
 **Location:** `skills/analysis/code/dependency-audit/`  
 **Documentation:** [README](skills/analysis/code/dependency-audit/README.md)  
