@@ -1,246 +1,270 @@
-# API Contract Sniffer Skill - Usage Guide
+# API Contract Sniffer
+
+A Claude Code skill for quickly discovering REST API endpoints across Python (Flask/FastAPI) and JavaScript/TypeScript (Express) projects.
 
 ## Overview
 
-The `api-contract-sniffer` skill analyzes codebases to detect API contract violations, missing documentation, and inconsistent endpoint definitions. It helps maintain API integrity across your codebase.
+API Contract Sniffer analyzes your codebase to find route declarations with precise file locations, line numbers, HTTP methods, and route paths. This helps map your API surface without reading full controller files.
 
-**Token Efficiency**: ~800 tokens vs ~2K manual inspection (60% reduction)
+## Supported Frameworks
 
-## Quick Start
+- **Python**: Flask (`@app.route`, `@app.get`) and FastAPI (`@router.get`, `@router.post`)
+- **JavaScript/TypeScript**: Express (`app.get()`, `router.post()`)
 
-### Natural Language Invocation
-```
-"Check for API contract violations in the user service"
-"Sniff the authentication module for missing API docs"
-"Analyze the payment endpoints for contract consistency"
-```
+## How It Works
 
-### Direct Skill Invocation
-```
+1. **Auto-detects project framework** by scanning for `.py`, `.js`, or `.ts` files
+2. **Finds source directory** automatically (`src/`, `app/`, `api/`, or current directory)
+3. **Extracts route declarations** with decorators and method calls
+4. **Parses HTTP methods and paths** using sed patterns
+5. **Reports** the first 15 endpoints with precise file locations
+
+## Usage
+
+Simply invoke the skill in your project directory:
+
+```bash
 /api-contract-sniffer
 ```
 
-## What It Detects
+The skill will automatically:
+- Detect your project's framework
+- Find the appropriate source directory
+- Generate a report of API endpoints
 
-✅ **Contract Violations**:
-- Missing `@param` documentation
-- Incorrect return type annotations
-- Mismatched parameter names
-- Missing error response documentation
+## Output Format
 
-✅ **Endpoint Issues**:
-- Undocumented endpoints
-- Inconsistent URL patterns
-- Missing HTTP method specifications
-- Duplicate endpoint definitions
+### Python Projects (Flask/FastAPI)
 
-✅ **Documentation Gaps**:
-- Missing OpenAPI/Swagger specs
-- Incomplete parameter descriptions
-- Missing response examples
-- Outdated API documentation
-
-## Analysis Process
-
-### Phase 1: Code Discovery
-Scans for API-related files:
-- Controller files (`*controller*`, `*api*`)
-- Route definitions (`routes.js`, `urls.py`, etc.)
-- API documentation (`swagger.yaml`, `openapi.json`)
-- Service interfaces (`*service*`, `*interface*`)
-
-### Phase 2: Contract Extraction
-Extracts API contracts from:
-- Function/method signatures
-- Decorators and annotations
-- Docstrings and comments
-- Configuration files
-
-### Phase 3: Validation
-Checks for consistency between:
-- Code implementation vs documentation
-- Parameter definitions vs usage
-- Return types vs actual returns
-- Error handling vs documented errors
-
-### Phase 4: Report Generation
-Creates detailed findings with:
-- Violation locations (file:line)
-- Severity levels (critical, warning, info)
-- Suggested fixes
-- Contract coverage metrics
-
-## Example Usage
-
-### Example 1: REST API Analysis
 ```
-User: "Check the user management API for contract issues"
-
-Claude: 🔍 Analyzing user management API contracts...
-
-📊 Discovery Results:
-- Found 12 API endpoints in user_controller.py
-- Located OpenAPI spec: docs/user-api.yaml
-- Identified 8 service methods
-
-⚠️ Contract Violations Found:
-1. CRITICAL: Missing @param validation in create_user()
-   Location: user_controller.py:45
-   Issue: Email parameter lacks format validation
-   Fix: Add @param email:string format=email
-
-2. WARNING: Inconsistent return type in get_user()
-   Location: user_controller.py:78
-   Issue: Returns User object, doc says UserDTO
-   Fix: Update documentation or change return type
-
-3. INFO: Missing response example in update_user()
-   Location: user_controller.py:112
-   Issue: No example response provided
-   Fix: Add response example to docstring
-
-📈 Coverage: 75% (9/12 endpoints fully documented)
+=== Python API Endpoints (Flask/FastAPI) ===
+src/api/users.py:42 GET /api/users
+src/api/users.py:67 POST /api/users
+src/api/users.py:89 DELETE /api/users/<id>
+src/api/auth.py:15 POST /api/auth/login
+src/api/health.py:8 GET /health
 ```
 
-### Example 2: Microservice Contract Check
+### JavaScript/TypeScript Projects (Express)
+
 ```
-User: "Analyze the payment service contracts"
-
-Claude: 🔍 Scanning payment service for API contract issues...
-
-📋 Analysis Summary:
-- Service: payment_service.py (1,247 lines)
-- Endpoints: 15 payment-related APIs
-- Documentation: payment-api.md (incomplete)
-
-🚨 Critical Issues:
-1. Missing error handling docs for payment failures
-2. No timeout specifications for external calls
-3. Currency parameter lacks validation rules
-
-✅ Good Practices Found:
-- Consistent naming conventions
-- Proper HTTP status codes
-- Clear parameter descriptions
-
-💡 Recommendations:
-1. Add comprehensive error response documentation
-2. Include rate limiting information
-3. Specify data formats (ISO 8601 dates, currency codes)
+=== JavaScript/TypeScript API Endpoints (Express) ===
+src/routes/users.ts:23 GET /api/users
+src/routes/users.ts:45 POST /api/users
+src/routes/users.ts:67 PUT /api/users/:id
+src/routes/auth.js:12 POST /api/auth/login
+src/server.js:18 GET /health
 ```
 
-## Integration with Development Workflow
+Each line shows:
+- **File path**: Relative path to the controller/route file
+- **Line number**: Where the endpoint is defined
+- **HTTP method**: GET, POST, PUT, DELETE, PATCH, USE
+- **Route path**: The URL path for the endpoint
 
-**Before API Changes**:
-```
-1. /api-contract-sniffer (baseline check)
-2. Make API modifications
-3. /api-contract-sniffer (verify no new violations)
-4. Update documentation
-```
+## Verification Workflow
 
-**During Code Review**:
-```
-1. Reviewer runs /api-contract-sniffer
-2. Checks for contract violations
-3. Ensures documentation updates
-4. Approves with contract compliance
+**Important**: The skill finds declarations, not runtime behavior. Always verify endpoints are actually registered.
+
+### Step 1: Run the Skill
+
+```bash
+/api-contract-sniffer
 ```
 
-**In CI/CD Pipeline**:
+### Step 2: Verify Individual Endpoints
+
+For each endpoint, check all references:
+
+```bash
+# Replace /api/users with the actual route
+grep -rn "'/api/users'\|/api/users" . --include="*.py" --include="*.js" --include="*.ts" --color=always | head -20
 ```
-# Add to pre-commit or CI pipeline
-/api-contract-sniffer --fail-on-critical
-# Fails build if critical violations found
+
+This shows:
+- All occurrences in the codebase
+- Tests that exercise the endpoint
+- Client code that calls the API
+
+### Step 3: Check for False Negatives
+
+The skill may miss:
+- **Dynamically registered routes** (added at runtime via loops or config)
+- **Routes in separate config files** (YAML, JSON, or external configs)
+- **Middleware-wrapped endpoints** (hidden behind middleware layers)
+- **Auto-generated REST APIs** (ORM-based CRUD endpoints)
+
+### Step 4: Use Framework Tools for Complete Mapping
+
+For comprehensive route listing:
+
+```bash
+# Flask
+flask routes
+
+# Express (if routes script exists)
+npm run routes
 ```
 
-## Supported Languages & Frameworks
+## Known Limitations
 
-✅ **Primary Support**:
-- Python (Flask, Django, FastAPI)
-- JavaScript/TypeScript (Express, NestJS)
-- Java (Spring Boot)
-- C# (.NET Core/Web API)
+### False Negatives
 
-✅ **Documentation Formats**:
-- OpenAPI 3.0+
-- Swagger 2.0
-- JavaDoc/Docstrings
-- TypeScript interfaces
-- C# XML documentation
+The skill may miss:
 
-⚠️ **Limited Support**:
-- GraphQL schemas
-- gRPC proto files
-- Custom annotation systems
+| Scenario | Example | Why It's Missed |
+|----------|---------|-----------------|
+| Dynamic routes | `for path in paths: app.route(path)` | Not in static code |
+| Config-based routes | Routes in `routes.yaml` | Not in source files |
+| Blueprint routes | Registered via `app.register_blueprint()` | Complex registration |
+| Middleware routes | Hidden by `app.use(middleware)` | Indirection |
+| Auto-generated APIs | ORM-based CRUD | Generated at runtime |
 
-## Configuration Options
+### Framework-Specific Patterns
 
-**Severity Thresholds**:
-- `--critical-only`: Report only critical violations
-- `--warning-level`: Include warnings and above
-- `--info-level`: Show all findings (most verbose)
+**Flask/FastAPI patterns detected**:
+- `@app.route('/path', methods=['GET'])`
+- `@app.get('/path')`, `@app.post('/path')`
+- `@router.get('/path')`, `@router.post('/path')`
 
-**Scope Control**:
-- `--path=src/api`: Analyze specific directory only
-- `--exclude=tests`: Skip test files
-- `--include=*.py`: Focus on specific file types
-
-**Output Formats**:
-- `--format=markdown`: Human-readable report
-- `--format=json`: Machine-readable output
-- `--format=sarif`: IDE integration format
-
-## Common Issues & Solutions
-
-### Issue 1: "No API endpoints found"
-**Cause**: Non-standard project structure
-**Solution**: Use `--path` parameter to specify API directory
-
-### Issue 2: "Documentation coverage low"
-**Cause**: Missing OpenAPI spec or inconsistent doc locations
-**Solution**: Create centralized API documentation or use annotations
-
-### Issue 3: "False positive violations"
-**Cause**: Dynamic typing or runtime contract validation
-**Solution**: Add suppression comments or adjust validation rules
-
-## Best Practices
-
-1. **Consistent Documentation**: Maintain API docs close to code
-2. **Standard Patterns**: Use consistent endpoint naming and structure
-3. **Validation Early**: Add contract validation to development workflow
-4. **Regular Audits**: Run monthly contract compliance checks
-5. **Team Standards**: Document your API contract standards
-
-## Anti-Patterns to Avoid
-
-❌ **Don't**:
-- Mix contract validation with business logic
-- Use overly complex contract definitions
-- Ignore minor violations (they accumulate)
-- Rely solely on automated checking
-
-✅ **Do**:
-- Keep contracts simple and clear
-- Update documentation with code changes
-- Review violations regularly
-- Use consistent patterns across APIs
+**Express patterns detected**:
+- `app.get('/path', handler)`
+- `router.post('/api/path', handler)`
+- `app.use('/middleware')`
 
 ## Token Efficiency
 
-- Small API (10 endpoints): ~400 tokens
-- Medium API (50 endpoints): ~800 tokens
-- Large API (100+ endpoints): ~1,200 tokens
-- Report generation: ~200 tokens
+- **This skill**: ~600-800 tokens
+- **Manual approach**: Reading all controller files (~20,000+ tokens)
+- **Savings**: 96% reduction in token usage
 
-## Related Skills
+## Advanced Usage
 
-- `analysis/code/dead-code-hunter` - Find unused API endpoints
-- `analysis/code/dependency-audit` - Check API dependencies
-- `git/diff-summariser` - Review API changes
-- `development/refactoring` - Restructure APIs safely
+### Custom Source Directory
 
----
+If your project has a non-standard structure, override the source directory:
 
-**Ready to analyze?** Just tell Claude: "Check my API contracts" or "Sniff for contract violations in [module]"!
+```bash
+# Force specific directory
+SRC_DIR="backend/routes" /api-contract-sniffer
+```
+
+### Framework-Specific Analysis
+
+Force framework detection:
+
+```bash
+# Analyze only Python endpoints
+cd my-api && grep -rn '@app\.route\|@router\.\(get\|post\|put\|delete\|patch\)' src/ --include="*.py"
+
+# Analyze only Express endpoints
+cd my-api && grep -rn '\(app\|router\)\.\(get\|post\|put\|delete\|patch\|use\)(' src/ --include="*.js" --include="*.ts"
+```
+
+## Integration with Other Skills
+
+- **Use after**: `/repo-briefing` to understand project structure first
+- **Combine with**: `/dead-code-hunter` to find unused endpoint handlers
+- **Follow up with**: `/quick-test-runner` to verify endpoint tests exist
+- **Use before**: API documentation generation or refactoring
+
+## Use Cases
+
+1. **New team members** - Quick API inventory
+2. **Security audit** - What endpoints are exposed?
+3. **API refactoring** - Identify endpoints to consolidate
+4. **Documentation** - Generate OpenAPI/Swagger specs
+5. **Testing** - Find endpoints missing tests
+
+## Best Practices
+
+1. **Run regularly** during API development
+2. **Verify output** - don't trust blindly, check framework tools too
+3. **Document missing endpoints** - add comments for dynamic routes
+4. **Use for planning** - before major API refactors
+5. **Combine with tests** - ensure all endpoints have test coverage
+6. **Check authentication** - verify endpoints have proper auth
+
+## Troubleshooting
+
+### "No Python or JS/TS files detected"
+
+- Verify you're in the project root directory
+- Check if files have correct extensions (`.py`, `.js`, `.ts`)
+- Try specifying `SRC_DIR` explicitly
+
+### Missing endpoints in output
+
+- Check if routes are registered dynamically
+- Look for routes in config files (YAML, JSON)
+- Use framework-specific tools (`flask routes`, `npm run routes`)
+- Verify blueprint/router registration
+
+### Too many false positives
+
+- Focus on files in `routes/`, `api/`, `controllers/` directories
+- Check file:line to verify actual route definitions
+- Use verification helper to check if endpoint is actually called
+
+## Examples
+
+### Example 1: Map Flask API
+
+```bash
+$ cd my-flask-api
+$ /api-contract-sniffer
+
+=== Python API Endpoints (Flask/FastAPI) ===
+src/api/users.py:42 GET /api/users
+src/api/users.py:67 POST /api/users
+src/api/users.py:89 DELETE /api/users/<id>
+src/api/auth.py:15 POST /api/auth/login
+src/api/auth.py:28 POST /api/auth/refresh
+src/api/health.py:8 GET /health
+
+# Verify first endpoint
+$ grep -rn "'/api/users'" . --include="*.py"
+src/api/users.py:42:@app.route('/api/users', methods=['GET'])
+tests/test_api.py:15:    response = client.get('/api/users')
+# Endpoint is tested ✓
+```
+
+### Example 2: Express API Security Audit
+
+```bash
+$ cd my-express-api
+$ /api-contract-sniffer
+
+=== JavaScript/TypeScript API Endpoints (Express) ===
+src/routes/users.ts:23 GET /api/users
+src/routes/users.ts:45 POST /api/users
+src/routes/auth.js:12 POST /api/auth/login
+src/routes/admin.js:8 DELETE /api/admin/users/:id
+src/server.js:18 GET /health
+
+# Check if admin endpoint requires auth
+$ grep -B5 "DELETE /api/admin/users" src/routes/admin.js
+5: const requireAdmin = require('../middleware/auth');
+6:
+7: router.delete('/api/admin/users/:id',
+8:   requireAdmin,  // ✓ Has auth middleware
+9:   async (req, res) => {
+```
+
+### Example 3: Finding Undocumented Endpoints
+
+```bash
+$ /api-contract-sniffer > endpoints.txt
+$ # Compare with API docs
+$ cat docs/api.md | grep -o '/api/[^)]*' | sort > documented.txt
+$ comm -13 documented.txt <(cat endpoints.txt | awk '{print $3}' | sort)
+# Shows endpoints missing from docs
+```
+
+## Contributing
+
+Found a bug or have suggestions? Issues and PRs welcome at the [claude-code-skills repository](https://github.com/chokmah-me/claude-code-skills).
+
+## License
+
+Part of the claude-code-skills collection. See repository root for license information.
