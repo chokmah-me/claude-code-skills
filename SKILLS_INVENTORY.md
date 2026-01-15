@@ -1,11 +1,11 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-15 22:59 UTC*
+*Last updated: 2026-01-15 23:06 UTC*
 
-**Total Skills:** 22  
+**Total Skills:** 23  
 **Categories:** 6  
-**Skills with README:** 21  
+**Skills with README:** 22  
 
 ### Analysis / Code (4 skills)
 
@@ -145,7 +145,7 @@ Generate a token-efficient repository summary with structure, README, package me
 **Location:** `skills/git/repo-briefing/`  
 **Documentation:** [README](skills/git/repo-briefing/README.md)  
 
-### Meta (6 skills)
+### Meta (7 skills)
 
 #### Claude Startup Integration
 Master integration system that orchestrates all startup skill discovery, showcases, recommendations, and user onboarding. Ensures seamless presentation of your complete Claude Code skill ecosystem at startup with intuitive access and agent-friendly interfaces.
@@ -186,6 +186,14 @@ Intelligent skill recommendation system that analyzes current context, user beha
 
 **Location:** `skills/meta/skill-recommendation-engine/`  
 **Documentation:** [README](skills/meta/skill-recommendation-engine/README.md)  
+
+#### Skill Upgrader
+Systematically upgrade existing Claude Code skills to production quality with multi-language support, precise output, and comprehensive documentation. Use when improving substandard skills or adding missing features.
+
+**Purpose:** Systematically upgrade existing Claude Code skills from basic/broken implementations to production-ready quality. Applies a proven pattern: multi-language detection, precise output formats, verification helpers, and comprehensive documentation.
+
+**Location:** `skills/meta/skill-upgrader/`  
+**Documentation:** [README](skills/meta/skill-upgrader/README.md)  
 
 #### Startup Skill Showcase
 Intuitive skill discovery and showcase system that presents your available Claude Code skills at startup, with special emphasis on meta-skills and useful workflows. Provides easy access to skill documentation and usage examples.
