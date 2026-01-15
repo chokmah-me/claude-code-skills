@@ -5,17 +5,28 @@ description: Save session state snapshots with precise resume instructions for c
 
 # Session Snapshot Skill
 
-## Purpose
+## 🎯 Purpose
 Create recoverable session snapshots that capture task context, decisions, and progress. Enables precise resume after crashes, context clears, or multi-day breaks.
 
-## When to Use
+## 🚀 Key Features
+
+- **Session recovery**: Capture task context, decisions, and progress for precise resume after crashes or breaks
+- **Token efficiency**: ~1500 tokens total vs 10k+ for restart (85% reduction)
+- **Multi-level resume**: Quick resume (context intact), cold resume (new session), recovery from failure
+- **Git integration**: Automatic .gitignore handling, commit SHA tracking
+- **Multiple snapshots**: Named snapshots for parallel tasks (`.session-snapshot-[name].md`)
+- **Clear resume workflow**: Step-by-step instructions for rebuilding context
+
+## 📋 Usage
+
+**When to use**:
 - Before risky operations (major refactors, schema changes)
 - Every 15-20 messages in long sessions
 - User says: "save checkpoint", "snapshot state", "save progress"
 - Before `/clear` or ending session
 - Multi-day projects (save at end of each session)
 
-## Instructions
+### Instructions
 
 ### Step 1: Capture Session State
 
@@ -180,6 +191,18 @@ Read the exact files listed in snapshot:
 
 Pick up from "Next Steps" checklist. Mark completed items and proceed.
 
+## 🎛️ Parameters
+
+**None required** - The skill auto-captures session state from current context.
+
+**Optional naming** (for multiple snapshots):
+- Default: `.session-snapshot.md`
+- Named: `.session-snapshot-[name].md` (e.g., `.session-snapshot-feature-auth.md`)
+
+**Captured fields**:
+- **Required**: timestamp, task_summary, current_phase, files_modified, files_read, next_steps
+- **Optional**: decisions_made, context_preservation, blockers, test_status, commit_sha
+
 ## Anti-Patterns
 
 ❌ Don't snapshot every 2-3 messages (too frequent)
@@ -199,7 +222,7 @@ Pick up from "Next Steps" checklist. Mark completed items and proceed.
 - Resume from cold start: ~600 tokens
 - Total cost: ~1500 tokens (vs. restarting from scratch: 10k+ tokens)
 
-## Example Usage
+## 💡 Examples
 
 ### Example 1: Refactoring Session
 
@@ -278,6 +301,76 @@ Claude: 📋 Resuming from 2026-01-06 snapshot
 Starting hierarchical implementation...
 ```
 
+### Example 4: Parallel Task Snapshots
+
+**Trigger**:
+```
+User: I'm working on authentication and a bug fix in parallel. Save separate snapshots.
+```
+
+**Execution**:
+Create named snapshots:
+- `.session-snapshot-feature-auth.md` - Auth feature work
+- `.session-snapshot-bugfix-race.md` - Race condition fix
+
+**Output**:
+```
+✅ **Snapshots saved**:
+- `.session-snapshot-feature-auth.md` (OAuth2 implementation)
+- `.session-snapshot-bugfix-race.md` (Race condition in cache)
+
+**Resume**: "Read [snapshot-name] and continue"
+```
+
+## 🎁 Output
+
+### Snapshot File Structure
+
+Creates `.session-snapshot.md` in project root:
+
+```markdown
+# Session Snapshot
+
+**Timestamp**: 2026-01-15T14:30:00Z
+**Task**: Extract GraphTopology component from NetworkEnvironment
+**Phase**: Pre-refactoring checkpoint
+
+## Context
+We're extracting the graph topology logic from NetworkEnvironment into a separate GraphTopology class to improve modularity and testability.
+
+## Decisions Made
+- Use composition over inheritance for topology management
+- Keep existing API surface for backward compatibility
+
+## Files Modified
+- `src/network.py` (lines 20-150: extracted GraphTopology)
+- `src/graph_topology.py` (new file: GraphTopology class)
+- `tests/test_network.py` (lines 45-60: updated tests)
+
+## Next Steps
+- [ ] Update imports in network.py:25
+- [ ] Run `pytest tests/test_network.py -v`
+- [ ] Commit with message: "refactor: extract GraphTopology"
+
+## Resume Instructions
+### Quick Resume: Continue with next step: Update imports
+### Cold Resume: Read this file, check git status, run tests, continue from checklist
+```
+
+### Confirmation Message
+
+Shows brief confirmation:
+
+```
+✅ **Session snapshot saved**: `.session-snapshot.md`
+
+**Task**: Extract GraphTopology component
+**Phase**: Pre-refactoring checkpoint
+**Next**: Update imports in network.py:25
+
+**Resume**: "Read .session-snapshot.md and continue"
+```
+
 ## Integration with Other Skills
 
 **Before major refactoring**:
@@ -301,12 +394,14 @@ Every ~15 messages: Auto-suggest snapshot if user hasn't saved
 5. /session-snapshot (update to new baseline)
 ```
 
-## Notes
+## ⚠️ Important Notes
 
 - Snapshots are **local only** (.gitignore'd)
 - Multiple snapshots: Use `.session-snapshot-[name].md` for parallel tasks
 - For team sharing: Remove .gitignore and commit snapshots deliberately
 - Claude can auto-detect when to suggest snapshots (long sessions, risky ops)
+- **Cross-platform**: Bash commands require bash environment (Git Bash on Windows, native on macOS/Linux)
+- **Windows users**: Use Git Bash or WSL for .gitignore automation; can create snapshots manually if needed
 
 ## Related Skills
 

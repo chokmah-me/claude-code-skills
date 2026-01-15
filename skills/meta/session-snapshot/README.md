@@ -347,15 +347,17 @@ Ensure accuracy:
 - Confirm git status
 - Test resume process
 
-## Configuration Options
+## Planned Features
 
-**Snapshot Content**:
+The following configuration options are under consideration for future versions:
+
+**Snapshot Content** (not yet implemented):
 - `--minimal`: Essential fields only
 - `--comprehensive`: Include all optional fields
 - `--technical`: Focus on technical details
 - `--business`: Include business context
 
-**Resume Behavior**:
+**Resume Behavior** (not yet implemented):
 - `--auto-resume`: Automatically continue after loading
 - `--confirm-steps`: Ask before each resume step
 - `--dry-run`: Show what would happen without doing it
