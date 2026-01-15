@@ -1,7 +1,7 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-15 21:49 UTC*
+*Last updated: 2026-01-15 22:20 UTC*
 
 **Total Skills:** 22  
 **Categories:** 6  
@@ -28,7 +28,7 @@ Detect and remove unsafe Unicode/emoji characters that break YAML and GitHub Act
 #### Dead Code Hunter
 Find potentially unused functions, classes, and exports by comparing declarations to imports. Use when user says "find dead code", "unused functions", or "what can we delete".
 
-**Purpose:** Identify exported symbols that are never imported (~1k tokens).
+**Purpose:** Identify exported symbols that are never imported across Python and JavaScript/TypeScript codebases. This skill helps find potentially unused code by comparing declarations against imports, enabling safe cleanup and technical debt reduction.
 
 **Location:** `skills/analysis/code/dead-code-hunter/`  
 **Documentation:** [README](skills/analysis/code/dead-code-hunter/README.md)  
