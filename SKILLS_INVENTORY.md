@@ -1,11 +1,11 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-14 09:58 UTC*
+*Last updated: 2026-01-15 21:49 UTC*
 
 **Total Skills:** 22  
 **Categories:** 6  
-**Skills with README:** 20  
+**Skills with README:** 21  
 
 ### Analysis / Code (4 skills)
 
@@ -101,7 +101,7 @@ Publish and manage blog posts on Mataroa via API. Create, update, and retrieve p
 **Purpose:** Manage Mataroa blog posts directly from Claude Code without leaving your terminal. Publish from local markdown files or URLs, update existing posts, and retrieve content for editing (~700 tokens per operation vs 3000+ manual).
 
 **Location:** `skills/development/matarao/`  
-**Documentation:** No README  
+**Documentation:** [README](skills/development/matarao/README.md)  
 
 #### Quick Test Runner
 Run tests impacted by recent changes and show last 20 lines of output. Use when user says "run impacted tests", "test my changes", or "did I break anything".
