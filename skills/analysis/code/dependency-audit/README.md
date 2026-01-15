@@ -1,360 +1,400 @@
-# Dependency Audit Skill - Usage Guide
+# Dependency Audit
+
+A Claude Code skill for quickly listing runtime dependencies with version numbers across multiple languages and package managers.
 
 ## Overview
 
-The `dependency-audit` skill analyzes project dependencies to identify security vulnerabilities, outdated packages, licensing issues, and optimization opportunities. Keeps your codebase secure and maintainable.
+Dependency Audit analyzes your project to extract runtime dependencies with version information. Supports 7 major package managers and provides dependency counts for quick security audits and dependency reviews.
 
-**Token Efficiency**: ~500 tokens vs ~1.2K manual audit (60% reduction)
+## Supported Languages & Package Managers
 
-## Quick Start
+- **Node.js**: package.json (npm/yarn/pnpm)
+- **Python**: requirements.txt (pip)
+- **Rust**: Cargo.toml (cargo)
+- **Go**: go.mod (go modules)
+- **Ruby**: Gemfile (bundler)
+- **PHP**: composer.json (composer)
+- **Java**: pom.xml (maven)
 
-### Natural Language Invocation
-```
-"Audit dependencies for security issues"
-"Check if any packages need updating"
-"Review license compatibility in our dependencies"
-```
+## How It Works
 
-### Direct Skill Invocation
-```
+1. **Auto-detects package manager** by checking for dependency files in priority order
+2. **Extracts dependencies** with version numbers in native format
+3. **Counts total dependencies** for quick overview
+4. **Outputs first 20** dependencies for token efficiency
+
+## Usage
+
+Simply invoke the skill in your project directory:
+
+```bash
 /dependency-audit
 ```
 
-## What It Audits
+The skill will automatically:
+- Detect your project's package manager
+- Extract dependencies with versions
+- Show total dependency count
 
-✅ **Security Vulnerabilities**:
-- Known CVEs in dependencies
-- High-risk package versions
-- Malicious package detection
-- Supply chain security issues
+## Output Format
 
-✅ **Version Management**:
-- Outdated packages
-- Deprecated dependencies
-- End-of-life versions
-- Pre-release/beta usage
+### Node.js Project (package.json)
 
-✅ **License Compliance**:
-- License compatibility
-- Copyleft obligations
-- Commercial restrictions
-- License changes in updates
-
-✅ **Performance & Size**:
-- Bundle size impact
-- Duplicate dependencies
-- Unused dependencies
-- Heavy-weight packages
-
-## Audit Process
-
-### Phase 1: Dependency Discovery
-Identifies all dependency sources:
-- Package manager files (`package.json`, `requirements.txt`, etc.)
-- Lock files (`package-lock.json`, `Pipfile.lock`, etc.)
-- Container dependencies (`Dockerfile`, `docker-compose.yml`)
-- CI/CD dependencies (`.github/workflows`, etc.)
-
-### Phase 2: Security Scanning
-Checks for known vulnerabilities:
-- National Vulnerability Database (NVD)
-- GitHub Security Advisories
-- Package manager security feeds
-- Community-maintained vulnerability databases
-
-### Phase 3: Version Analysis
-Evaluates dependency versions:
-- Latest stable releases
-- Security update availability
-- Breaking change assessment
-- Compatibility analysis
-
-### Phase 4: License Review
-Analyzes licensing implications:
-- License compatibility matrix
-- Commercial usage restrictions
-- Attribution requirements
-- Copyleft obligations
-
-### Phase 5: Optimization Assessment
-Identifies improvement opportunities:
-- Bundle size optimization
-- Alternative lightweight packages
-- Native API replacements
-- Tree-shaking potential
-
-## Example Usage
-
-### Example 1: Security-Focused Audit
 ```
-User: "Check for security vulnerabilities in our dependencies"
+=== Node.js Dependencies (package.json) ===
+@types/node@^18.16.3
+cors@^2.8.5
+dotenv@^16.0.3
+express@^4.18.2
+jsonwebtoken@^9.0.0
+mongoose@^7.2.0
 
-Claude: 🔍 Auditing dependencies for security issues...
-
-📊 Audit Summary:
-- Dependencies analyzed: 127 packages
-- Direct dependencies: 23
-- Transitive dependencies: 104
-- Scan time: 3.2 seconds
-
-🚨 Critical Security Issues:
-1. Package: lodash@4.17.15
-   CVE: CVE-2021-23337
-   Severity: HIGH
-   Issue: Command injection vulnerability
-   Fix: Update to lodash@>=4.17.21
-   
-2. Package: axios@0.21.1
-   CVE: CVE-2021-3749
-   Severity: HIGH
-   Issue: Regular expression DoS
-   Fix: Update to axios@>=0.21.2
-
-⚠️ High Priority Updates:
-1. Package: express@4.17.1
-   Current: 4.17.1
-   Latest: 4.18.2
-   Breaking changes: None
-   Security fixes: 3 medium-severity
-   
-2. Package: jsonwebtoken@8.5.1
-   Current: 8.5.1
-   Latest: 9.0.2
-   Breaking changes: Minor (algorithm handling)
-   Security fixes: 2 vulnerabilities
-
-📈 Security Score: 6.5/10 (Improvement needed)
+Total: 18 runtime dependencies
 ```
 
-### Example 2: License Compliance Check
+### Python Project (requirements.txt)
+
 ```
-User: "Review license compatibility for commercial use"
+=== Python Dependencies (requirements.txt) ===
+Django==4.2.0
+Flask==2.3.2
+numpy==1.24.3
+pandas==2.0.2
+requests==2.31.0
 
-Claude: 📋 Reviewing dependency licenses for commercial compatibility...
-
-🔍 License Analysis:
-- Total packages: 89
-- License types found: 12
-- Commercial restrictions: 3 packages
-- Copyleft obligations: 2 packages
-
-⚠️ License Issues:
-1. Package: gpl-package@1.2.3
-   License: GPL-3.0
-   Issue: Strong copyleft - requires open-sourcing
-   Recommendation: Replace with MIT-licensed alternative
-   Alternative: mit-alternative@2.1.0 (API compatible)
-   
-2. Package: commercial-package@3.1.4
-   License: Commercial
-   Issue: Requires paid license for commercial use
-   Action: Verify license purchase
-   Documentation: https://vendor.com/licensing
-
-✅ Compatible Licenses:
-- MIT: 45 packages
-- Apache-2.0: 23 packages
-- BSD-3-Clause: 12 packages
-- ISC: 9 packages
-
-📊 Compliance Score: 7.2/10 (Mostly compliant)
+Total: 28 dependencies
 ```
 
-### Example 3: Performance Optimization Audit
+### Rust Project (Cargo.toml)
+
 ```
-User: "Find opportunities to reduce bundle size"
+=== Rust Dependencies (Cargo.toml) ===
+actix-web="4.3"
+clap={ version="4.3", features=["derive"] }
+serde={ version="1.0", features=["derive"] }
+tokio={ version="1.28", features=["full"] }
 
-Claude: 📦 Analyzing dependencies for bundle size optimization...
-
-🎯 Size Optimization Opportunities:
-
-Heavy Dependencies (Consider alternatives):
-1. Package: moment@2.29.4
-   Size: 232.7 KB (gzipped)
-   Usage: Date formatting (3 functions only)
-   Alternative: dayjs@1.11.9 (6.9 KB) - 97% smaller
-   Migration effort: Low (similar API)
-   
-2. Package: lodash@4.17.21
-   Size: 69.9 KB (gzipped)
-   Usage: 8 utility functions
-   Alternative: lodash-es + tree-shaking (12.3 KB)
-   Savings: 82% size reduction
-
-Duplicate Functionality:
-1. Packages: axios, fetch-polyfill, node-fetch
-   Issue: Multiple HTTP clients
-   Solution: Standardize on native fetch
-   Savings: 45.2 KB
-   
-2. Packages: underscore, lodash
-   Issue: Overlapping utility libraries
-   Solution: Choose one and migrate
-   Savings: 28.1 KB
-
-📈 Potential Savings:
-- Bundle size reduction: 312 KB (28%)
-- Load time improvement: ~180ms
-- Mobile data savings: Significant
+Total: 15 dependencies
 ```
 
-## Audit Types
+## Verification Workflow
 
-### Security Audit
-**Focus**: Vulnerabilities and security issues
-```
-/dependency-audit --type=security
-```
-**Reports**: CVEs, advisories, risk assessments
+### Step 1: Run the Skill
 
-### Version Audit
-**Focus**: Outdated packages and updates
-```
-/dependency-audit --type=versions
-```
-**Reports**: Update availability, breaking changes
-
-### License Audit
-**Focus**: Legal compliance and obligations
-```
-/dependency-audit --type=licenses
-```
-**Reports**: License compatibility, restrictions
-
-### Performance Audit
-**Focus**: Size and performance impact
-```
-/dependency-audit --type=performance
-```
-**Reports**: Bundle analysis, optimization suggestions
-
-### Comprehensive Audit
-**Focus**: All aspects combined
-```
-/dependency-audit --type=full
-```
-**Reports**: Complete dependency health assessment
-
-## Risk Assessment
-
-### 🔴 Critical Risk
-- Known vulnerabilities with exploits
-- Malicious packages
-- License violations
-- End-of-life dependencies
-
-### 🟡 Medium Risk
-- Outdated packages with security updates
-- Incompatible licenses
-- Performance bottlenecks
-- Unmaintained packages
-
-### 🟢 Low Risk
-- Minor version updates available
-- Non-critical security issues
-- Suboptimal performance
-- Missing documentation
-
-## Integration with Development Workflow
-
-**Regular Maintenance**:
-```
-Weekly: /dependency-audit --type=security
-Monthly: /dependency-audit --type=full
-Before releases: /dependency-audit --fail-on-high
+```bash
+/dependency-audit
 ```
 
-**CI/CD Integration**:
-```
-# Add to pipeline
-/dependency-audit --format=json --fail-on-critical
-# Fails build if critical issues found
-```
+### Step 2: Check for Vulnerabilities
 
-**Dependency Updates**:
-```
-1. /dependency-audit (current state)
-2. Update dependencies
-3. /dependency-audit (verify fixes)
-4. Run test suite
-5. Commit changes
-```
+After seeing dependencies, check for security issues:
 
-## Configuration Management
+```bash
+# Node.js - Check for known vulnerabilities
+npm audit
 
-**Package Manager Support**:
-- npm/yarn: `package.json`, `package-lock.json`
-- pip: `requirements.txt`, `Pipfile`, `pyproject.toml`
-- Maven: `pom.xml`
-- Gradle: `build.gradle`
-- NuGet: `*.csproj`, `packages.config`
+# Show only high/critical issues
+npm audit --json | jq '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical")'
 
-**Custom Rules**:
-```json
-{
-  "ignorePackages": ["internal-package"],
-  "severityOverrides": {
-    "axios": "medium"
-  },
-  "licenseWhitelist": ["MIT", "Apache-2.0", "BSD"]
-}
+# Python - Check for security issues
+pip-audit  # Requires: pip install pip-audit
+
+# Rust - Check advisories
+cargo audit  # Requires: cargo install cargo-audit
+
+# Go - Check vulnerabilities
+go list -json -m all | nancy sleuth  # Requires nancy tool
 ```
 
-**Exclusions**:
-- `--exclude-dev`: Skip development dependencies
-- `--exclude-optional`: Skip optional dependencies
-- `--ignore=CVE-2021-1234`: Ignore specific vulnerabilities
+### Step 3: Check for Updates
 
-## Best Practices
+Check if dependencies are outdated:
 
-1. **Regular Audits**: Schedule weekly security scans
-2. **Update Promptly**: Apply security updates immediately
-3. **License Awareness**: Understand license implications
-4. **Minimize Dependencies**: Only use what you need
-5. **Vendor Evaluation**: Research package maintainers
+```bash
+# Node.js
+npm outdated
 
-## Security Considerations
+# Python
+pip list --outdated
 
-**Vulnerability Management**:
-- Monitor security advisories
-- Apply updates promptly
-- Test security updates
-- Document security decisions
+# Rust
+cargo outdated  # Requires: cargo install cargo-outdated
 
-**Supply Chain Security**:
-- Use lock files
-- Verify package integrity
-- Avoid typosquatting packages
-- Prefer well-maintained packages
+# Go
+go list -u -m all
 
-## Troubleshooting
+# Ruby
+bundle outdated
 
-### Issue 1: "No dependencies found"
-**Cause**: Unrecognized project structure
-**Solution**: Specify package manager explicitly
+# PHP
+composer outdated
+```
 
-### Issue 2: "Audit timed out"
-**Cause**: Large dependency tree or slow network
-**Solution**: Use `--timeout=60` or analyze smaller scope
+### Step 4: Verify Usage
 
-### Issue 3: "False positive vulnerabilities"
-**Cause**: Vulnerability in unused functionality
-**Solution**: Review actual usage and suppress if appropriate
+Check if a dependency is actually used in code:
+
+```bash
+# Node.js/TypeScript
+grep -rn "require.*lodash\|import.*lodash\|from.*lodash" . --include="*.js" --include="*.ts"
+
+# Python
+grep -rn "import requests\|from requests" . --include="*.py"
+
+# Rust
+grep -rn "use serde\|extern crate serde" . --include="*.rs"
+```
+
+## Known Limitations
+
+### What This Skill Shows
+
+- ✅ **Declared dependencies**: What's in your dependency file
+- ✅ **Version ranges**: As specified (^4.18.2, ==4.2.0, etc.)
+- ✅ **Runtime dependencies**: Production packages only
+- ✅ **Direct dependencies**: Top-level packages
+
+### What This Skill Doesn't Show
+
+- ❌ **Dev dependencies**: devDependencies, [dev-dependencies], test packages
+- ❌ **Transitive dependencies**: Nested dependencies of your packages
+- ❌ **Resolved versions**: Actual installed versions in node_modules/venv
+- ❌ **Lockfile info**: Exact versions from package-lock.json, Cargo.lock
+
+### Comparison Table
+
+| Aspect | This Skill | Full Lockfile Parse |
+|--------|------------|---------------------|
+| Token cost | ~600-800 | ~20,000+ |
+| Speed | Instant | Slow |
+| Direct deps | ✅ | ✅ |
+| Transitive deps | ❌ | ✅ |
+| Exact versions | ❌ | ✅ |
+| Version ranges | ✅ | ❌ |
+
+## For Complete Dependency Info
+
+Use language-specific tools:
+
+```bash
+# Node.js - Full dependency tree
+npm list --all
+
+# Python - All installed packages
+pip freeze
+pip list
+
+# Rust - Complete dependency tree
+cargo tree
+
+# Go - All module dependencies
+go list -m all
+
+# Ruby - Bundle info
+bundle list
+
+# PHP - Complete dependencies
+composer show
+```
 
 ## Token Efficiency
 
-- Security audit: ~300 tokens
-- Version audit: ~400 tokens
-- License audit: ~350 tokens
-- Full comprehensive audit: ~500 tokens
+- **This skill**: ~600-800 tokens
+- **Manual approach**: Reading package-lock.json or Cargo.lock (~20,000+ tokens)
+- **Savings**: 96% reduction in token usage
+- **Benefit**: Quick overview enables targeted vulnerability research
 
-## Related Skills
+## Advanced Usage
 
-- `analysis/code/dead-code-hunter` - Find unused dependencies
-- `analysis/code/api-contract-sniffer` - Check API security
-- `git/diff-summariser` - Review dependency changes
-- `development/refactoring` - Update dependencies safely
+### Custom Output Limit
 
----
+Modify the skill command to show more/fewer dependencies:
 
-**Ready to audit?** Just tell Claude: "Audit my dependencies" or "Check for security vulnerabilities"!
+```bash
+# Show first 50 dependencies (change all head -20 to head -50)
+cat package.json | jq -r '.dependencies // {} | to_entries[] | "\(.key)@\(.value)"' | sort | head -50
+```
+
+### Check Specific Dependency File
+
+Force checking a specific file:
+
+```bash
+# Force package.json even if other files exist
+cat package.json | jq -r '.dependencies // {} | to_entries[] | "\(.key)@\(.value)"' | sort
+
+# Force requirements.txt
+grep -v '^#' requirements.txt | grep -v '^$' | sort
+```
+
+### Include Dev Dependencies
+
+Modify for Node.js to include devDependencies:
+
+```bash
+cat package.json | jq -r '.dependencies // {}, .devDependencies // {} | to_entries[] | "\(.key)@\(.value)"' | sort | uniq
+```
+
+## Integration with Other Skills
+
+- **Use with**: `/dead-code-hunter` to find unused dependencies
+- **Follow up**: Web search for CVE vulnerabilities on specific packages
+- **Before**: `/repo-briefing` to understand project structure
+- **After**: `/quick-test-runner` to verify tests pass with updated deps
+
+## Use Cases
+
+1. **Security audit** - Quick vulnerability assessment before deployment
+2. **Dependency review** - Understand what packages the project uses
+3. **Onboarding** - Help new developers understand dependencies
+4. **License compliance** - Identify packages for license audit
+5. **Migration planning** - Assess dependencies before major upgrades
+6. **Bloat detection** - Find heavy or unnecessary dependencies
+
+## Best Practices
+
+1. **Run regularly** - Check dependencies monthly or before releases
+2. **Follow up with audits** - Use `npm audit`, `pip-audit`, `cargo audit`
+3. **Check for updates** - Keep dependencies current for security
+4. **Review new deps** - Audit before adding new dependencies
+5. **Document choices** - Record why specific versions are used
+6. **Monitor CVEs** - Subscribe to security advisories for key packages
+
+## Troubleshooting
+
+### "No dependency file found"
+
+- Verify you're in the project root directory
+- Check if you have a supported dependency file
+- Supported files: package.json, requirements.txt, Cargo.toml, go.mod, Gemfile, composer.json, pom.xml
+
+### Missing dependencies in output
+
+- Skill only shows runtime dependencies (not dev)
+- Check if dependencies are in a different section (devDependencies, etc.)
+- For complete list, use language-specific tools (`npm list`, `pip freeze`)
+
+### Version numbers not showing
+
+- **Node.js/PHP**: Ensure `jq` is installed (`jq --version`)
+- **Python**: Check requirements.txt format (package==version)
+- **Rust**: Verify Cargo.toml [dependencies] section format
+
+### Wrong dependency file detected
+
+The skill checks files in priority order:
+1. package.json
+2. requirements.txt
+3. Cargo.toml
+4. go.mod
+5. Gemfile
+6. composer.json
+7. pom.xml
+
+If you have multiple files and want a specific one, modify the command to check only that file.
+
+## Examples
+
+### Example 1: Node.js Express API
+
+```bash
+$ cd my-express-api
+$ /dependency-audit
+
+=== Node.js Dependencies (package.json) ===
+@types/node@^18.16.3
+cors@^2.8.5
+dotenv@^16.0.3
+express@^4.18.2
+jsonwebtoken@^9.0.0
+mongoose@^7.2.0
+winston@^3.8.2
+
+Total: 18 runtime dependencies
+
+# Check for vulnerabilities
+$ npm audit
+found 2 vulnerabilities (1 moderate, 1 high)
+
+# Show details
+$ npm audit --json | jq '.vulnerabilities'
+```
+
+### Example 2: Python Django Project
+
+```bash
+$ cd my-django-app
+$ /dependency-audit
+
+=== Python Dependencies (requirements.txt) ===
+Django==4.2.0
+celery==5.2.7
+djangorestframework==3.14.0
+psycopg2-binary==2.9.6
+redis==4.5.5
+requests==2.31.0
+
+Total: 12 dependencies
+
+# Check for outdated packages
+$ pip list --outdated
+Package               Version   Latest
+--------------------- --------- ------
+celery                5.2.7     5.3.1
+requests              2.31.0    2.31.2
+```
+
+### Example 3: Rust CLI Tool
+
+```bash
+$ cd my-rust-cli
+$ /dependency-audit
+
+=== Rust Dependencies (Cargo.toml) ===
+clap={ version="4.3", features=["derive"] }
+serde={ version="1.0", features=["derive"] }
+serde_json="1.0"
+tokio={ version="1.28", features=["full"] }
+
+Total: 8 dependencies
+
+# Check for security advisories
+$ cargo audit
+No vulnerabilities found!
+```
+
+### Example 4: Multi-Language Monorepo
+
+```bash
+# Backend (Node.js)
+$ cd backend
+$ /dependency-audit
+=== Node.js Dependencies (package.json) ===
+express@^4.18.2
+...
+Total: 23 runtime dependencies
+
+# Frontend (different package.json)
+$ cd ../frontend
+$ /dependency-audit
+=== Node.js Dependencies (package.json) ===
+react@^18.2.0
+...
+Total: 31 runtime dependencies
+
+# CLI tool (Rust)
+$ cd ../cli
+$ /dependency-audit
+=== Rust Dependencies (Cargo.toml) ===
+clap={ version="4.3", features=["derive"] }
+...
+Total: 12 dependencies
+```
+
+## Contributing
+
+Found a bug or have suggestions? Issues and PRs welcome at the [claude-code-skills repository](https://github.com/chokmah-me/claude-code-skills).
+
+## License
+
+Part of the claude-code-skills collection. See repository root for license information.
