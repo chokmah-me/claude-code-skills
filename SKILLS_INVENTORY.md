@@ -1,7 +1,7 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-15 22:20 UTC*
+*Last updated: 2026-01-15 22:52 UTC*
 
 **Total Skills:** 22  
 **Categories:** 6  
@@ -12,7 +12,7 @@
 #### Api Contract Sniffer
 Show API surface by finding route declarations (REST endpoints). Use when user says "show api surface", "list endpoints", or "what routes exist".
 
-**Purpose:** Map API endpoints without reading full controller files (~500 tokens).
+**Purpose:** Map API endpoints without reading full controller files. Automatically detects framework (Flask/FastAPI/Express) and extracts precise endpoint locations with HTTP methods and routes.
 
 **Location:** `skills/analysis/code/api-contract-sniffer/`  
 **Documentation:** [README](skills/analysis/code/api-contract-sniffer/README.md)  
