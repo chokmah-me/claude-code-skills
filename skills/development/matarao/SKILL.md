@@ -17,12 +17,42 @@ Manage Mataroa blog posts directly from Claude Code without leaving your termina
 
 ## 📋 Usage
 
+### Quick Start
+
+**Step 1**: Get your API key from https://mataroa.blog/api/docs/
+
+**Step 2**: Ask Claude to publish a post:
+```
+"Publish this markdown file to my dybilar blog: post.md"
+```
+
+Claude will handle the API calls automatically using the matarao skill!
+
 ### Prerequisites
 Create config file at `~/.claude/matarao-config.json`:
+
+**Single blog:**
 ```json
 {
   "api_key": "your-mataroa-api-key-here",
   "base_url": "https://mataroa.blog/api/"
+}
+```
+
+**Multiple blogs:**
+```json
+{
+  "default": "dybilar",
+  "dybilar": {
+    "api_key": "your_key_here",
+    "base_url": "https://mataroa.blog/api/",
+    "blog_url": "https://dybilar.mataroa.blog"
+  },
+  "torah": {
+    "api_key": "your_key_here",
+    "base_url": "https://mataroa.blog/api/",
+    "blog_url": "https://torah.mataroa.blog"
+  }
 }
 ```
 
@@ -346,21 +376,51 @@ api_key=$(jq -r '.api_key' "${MATARAO_CONFIG:-~/.claude/matarao-config.json}")
 ```json
 // ~/.claude/matarao-config.json
 {
-  "default": {
-    "api_key": "key1",
-    "base_url": "https://mataroa.blog/api/"
+  "default": "dybilar",
+  "dybilar": {
+    "api_key": "your_key_here",
+    "base_url": "https://mataroa.blog/api/",
+    "blog_url": "https://dybilar.mataroa.blog"
   },
-  "work": {
-    "api_key": "key2",
-    "base_url": "https://mataroa.blog/api/"
+  "torah": {
+    "api_key": "your_key_here",
+    "base_url": "https://mataroa.blog/api/",
+    "blog_url": "https://torah.mataroa.blog"
   }
 }
 ```
 
+**Method 1: Using jq (if available)**
 ```bash
 # Use specific blog profile
-profile="work" && \
+profile="torah" && \
 api_key=$(jq -r ".$profile.api_key" ~/.claude/matarao-config.json)
+```
+
+**Method 2: Direct API key (no jq required)**
+```bash
+# For dybilar blog
+api_key="your_dybilar_key"
+
+# For torah blog
+api_key="your_torah_key"
+```
+
+**Method 3: JSON file payload (recommended - no escaping issues)**
+```bash
+# Create payload file
+cat > /tmp/post.json << 'EOF'
+{
+  "title": "My Post Title",
+  "body": "# My Post\n\nContent with proper formatting..."
+}
+EOF
+
+# Publish to specific blog
+curl -X POST https://mataroa.blog/api/posts/ \
+  -H "Authorization: Bearer $api_key" \
+  -H "Content-Type: application/json" \
+  -d @/tmp/post.json
 ```
 
 ### Content Preprocessing
