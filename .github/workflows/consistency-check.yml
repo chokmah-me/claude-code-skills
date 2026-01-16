@@ -1,0 +1,31 @@
+name: Skill Consistency Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run consistency checks
+        run: python .github/scripts/check_consistency.py
+
+      - name: Upload consistency report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: consistency-report
+          path: consistency-report.txt
+          retention-days: 30

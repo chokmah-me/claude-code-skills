@@ -1,13 +1,16 @@
-name: Documentation Validation
+name: Skill Testing
 
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
-  validate:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,15 +25,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml jsonschema
+          pip install markdown-it-py
 
-      - name: Run documentation validation
-        run: python .github/scripts/validate_docs.py
+      - name: Run skill tests
+        run: python .github/scripts/test_skills.py
 
-      - name: Upload validation report
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: validation-report
-          path: validation-report.json
+          name: test-results
+          path: test-results.json
           retention-days: 30
