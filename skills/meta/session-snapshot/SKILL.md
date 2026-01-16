@@ -5,10 +5,10 @@ description: Save session state snapshots with precise resume instructions for c
 
 # Session Snapshot Skill
 
-## 🎯 Purpose
+## Description
 Create recoverable session snapshots that capture task context, decisions, and progress. Enables precise resume after crashes, context clears, or multi-day breaks.
 
-## 🚀 Key Features
+## Features
 
 - **Session recovery**: Capture task context, decisions, and progress for precise resume after crashes or breaks
 - **Token efficiency**: ~1500 tokens total vs 10k+ for restart (85% reduction)
@@ -18,7 +18,7 @@ Create recoverable session snapshots that capture task context, decisions, and p
 - **Multiple snapshots**: Named snapshots for parallel tasks with independent rolling windows (`.session-snapshot-[name]-YYYYMMDD-HHMMSS.md`)
 - **Clear resume workflow**: Step-by-step instructions for rebuilding context
 
-## 📋 Usage
+## Usage
 
 **When to use**:
 - Before risky operations (major refactors, schema changes)
@@ -262,7 +262,7 @@ Read the exact files listed in snapshot:
 
 Pick up from "Next Steps" checklist. Mark completed items and proceed.
 
-## 🎛️ Parameters
+## Parameters
 
 **None required** - The skill auto-captures session state from current context.
 
@@ -351,7 +351,7 @@ mv .session-snapshot-20260110-*.md .snapshot-archive/
 ls -lt .snapshot-archive/.session-snapshot-*.md
 ```
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Refactoring Session
 
@@ -513,7 +513,7 @@ $ ls -lt .session-snapshot-*.md
 .session-snapshot-20260111-140000.md  (oldest - 20260110 was auto-deleted)
 ```
 
-## 🎁 Output
+## Output
 
 ### Snapshot File Structure
 
@@ -587,7 +587,7 @@ Every ~15 messages: Auto-suggest snapshot if user hasn't saved
 5. /session-snapshot (update to new baseline)
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 - Snapshots are **local only** (.gitignore'd with pattern `.session-snapshot-*.md`)
 - **Timestamped files**: All snapshots use format `.session-snapshot-YYYYMMDD-HHMMSS.md`

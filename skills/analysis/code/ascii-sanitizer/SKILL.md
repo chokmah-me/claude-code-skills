@@ -5,10 +5,10 @@ description: Detect and remove unsafe Unicode/emoji characters that break YAML a
 
 # ASCII Sanitizer
 
-## 🎯 Purpose
+## Description
 Prevent CI/CD pipeline failures caused by non-ASCII characters (emojis, smart quotes, Unicode symbols) in code, configuration files, and documentation. This skill detects problematic characters that break YAML parsers and GitHub Actions workflows, then provides safe ASCII replacements.
 
-## 🚀 Key Features
+## Features
 - Detect non-ASCII characters in source files (emojis, Unicode symbols, smart quotes, zero-width spaces)
 - Show exact file locations with line numbers and character codes
 - Provide safe ASCII replacement suggestions
@@ -16,7 +16,7 @@ Prevent CI/CD pipeline failures caused by non-ASCII characters (emojis, smart qu
 - Optional auto-fix mode with safety warnings
 - GitHub Actions integration available for automated PR checks
 
-## 📋 Usage
+## Usage
 
 ### Basic Detection
 Scan a single file for non-ASCII characters:
@@ -56,7 +56,7 @@ sed -i 's/…/.../g' file.yaml
 sed -i 's/[^\x00-\x7F]//g' file.yaml
 ```
 
-## 🎛️ Parameters
+## Parameters
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -67,7 +67,7 @@ sed -i 's/[^\x00-\x7F]//g' file.yaml
 | `--show-codes` | Display Unicode codepoints (U+XXXX) | true |
 | `--backup` | Create .bak files before fixing | true |
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Detect Unicode in GitHub Actions Workflow
 ```bash
@@ -126,7 +126,7 @@ done
 git diff
 ```
 
-## 🎁 Output
+## Output
 
 The skill provides structured output showing:
 
@@ -149,7 +149,7 @@ The skill provides structured output showing:
   Suggestion: Remove emoji or use :rocket:
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 ### YAML-Breaking Characters
 These characters commonly break YAML parsers:

@@ -5,11 +5,11 @@ description: Systematic, safe code restructuring with comprehensive validation, 
 
 # Refactoring Skill
 
-## 🎯 Purpose
+## Description
 
 Provides systematic, safe code restructuring capabilities with comprehensive validation. Handles complex refactorings while preserving behavior through built-in testing, rollback mechanisms, and step-by-step validation. Routes to specialized workflow templates based on refactoring type.
 
-## 🚀 Key Features
+## Features
 
 - **Safety-First Approach**: Automatic test execution before and after changes
 - **Multiple Refactoring Types**: Extract, modernize, triage workflows
@@ -18,7 +18,7 @@ Provides systematic, safe code restructuring capabilities with comprehensive val
 - **Step-by-Step Validation**: Incremental changes with verification at each step
 - **Workflow Routing**: Directs to specialized templates for different refactoring patterns
 
-## 📋 Usage
+## Usage
 
 ### Natural Language Invocation
 ```
@@ -39,7 +39,7 @@ The skill analyzes your request and routes to the appropriate workflow template 
 - **modernize.md**: Update legacy code to modern patterns
 - **triage.md**: Categorize and prioritize code quality issues
 
-## 🎛️ Parameters
+## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -49,7 +49,7 @@ The skill analyzes your request and routes to the appropriate workflow template 
 | run_tests | boolean | No | Execute tests before/after (default: true) |
 | incremental | boolean | No | Apply changes incrementally with validation (default: true) |
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Extract Method Refactoring
 ```
@@ -92,7 +92,7 @@ Claude: I'll use the refactoring skill to analyze and categorize issues.
 Result: 15 issues found (3 critical, 5 high, 7 medium), prioritized remediation plan generated
 ```
 
-## 🎁 Output
+## Output
 
 The skill produces:
 1. **Refactored Code**: Restructured code following best practices
@@ -119,7 +119,7 @@ Behavior Validation: ✓ All original functionality preserved
 Rollback: git checkout src/controllers/UserController.js && rm src/validators/UserValidator.js
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 ### Safety Considerations
 - **Always run tests**: The skill automatically runs tests before/after refactoring

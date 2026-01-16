@@ -5,17 +5,17 @@ description: Publish and manage blog posts on Mataroa via API. Create, update, a
 
 # matarao
 
-## 🎯 Purpose
+## Description
 Manage Mataroa blog posts directly from Claude Code without leaving your terminal. Publish from local markdown files or URLs, update existing posts, and retrieve content for editing (~700 tokens per operation vs 3000+ manual).
 
-## 🚀 Key Features
+## Features
 - **Create posts** from local markdown files or remote URLs
 - **Update existing posts** with new content or metadata
 - **Retrieve posts** to review or edit locally
 - **Secure authentication** via JSON config file
 - **No rate limiting** - unlimited API calls to Mataroa
 
-## 📋 Usage
+## Usage
 
 ### Quick Start
 
@@ -101,7 +101,7 @@ curl -X PATCH "https://mataroa.blog/api/posts/$slug/" \
   -d "{\"body\":\"$new_body\"}"
 ```
 
-## 🎛️ Parameters
+## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -111,7 +111,7 @@ curl -X PATCH "https://mataroa.blog/api/posts/$slug/" \
 | published_at | ISO date | No | Publication timestamp (ISO 8601 format, e.g. "2026-01-13") |
 | source | path/URL | Yes | Local file path or remote URL for content |
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Publish Local Markdown File
 ```bash
@@ -189,7 +189,7 @@ curl -X POST https://mataroa.blog/api/posts/ \
 # Note: Leave published_at empty to unpublish/create draft
 ```
 
-## 🎁 Output
+## Output
 
 All API responses include:
 - `ok`: true/false success indicator
@@ -219,7 +219,7 @@ All API responses include:
 }
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 - **Config file required**: Create `~/.claude/matarao-config.json` before first use
 - **API key security**: Never commit config file to git (add to .gitignore)

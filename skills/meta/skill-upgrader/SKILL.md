@@ -5,11 +5,11 @@ description: Systematically upgrade existing Claude Code skills to production qu
 
 # Skill Upgrader
 
-## 🎯 Purpose
+## Description
 
 Systematically upgrade existing Claude Code skills from basic/broken implementations to production-ready quality. Applies a proven pattern: multi-language detection, precise output formats, verification helpers, and comprehensive documentation.
 
-## 🚀 Key Features
+## Features
 
 - **Proven upgrade pattern**: Based on successful improvements to dead-code-hunter, api-contract-sniffer, and dependency-audit
 - **Standardized quality**: Ensures all required emoji sections and documentation
@@ -19,7 +19,7 @@ Systematically upgrade existing Claude Code skills from basic/broken implementat
 - **Comprehensive docs**: Generates README.md with examples, workflows, troubleshooting
 - **Token efficient**: Follows established pattern rather than reinventing each time
 
-## 📋 Usage
+## Usage
 
 When you need to upgrade a skill:
 
@@ -28,7 +28,7 @@ When you need to upgrade a skill:
 3. **Test upgraded skill** - Verify improvements work
 4. **Commit and document** - Push changes with detailed commit message
 
-## 🎛️ Parameters
+## Parameters
 
 - **skill_path**: Path to skill directory (e.g., `skills/analysis/code/skill-name/`)
 - **upgrade_type**: Type of upgrade needed
@@ -124,28 +124,28 @@ fi
 Ensure all required sections exist in SKILL.md:
 
 ```markdown
-## 🎯 Purpose
+## Description
 [1-2 sentences describing what problem it solves]
 
-## 🚀 Key Features
+## Features
 - **Feature 1**: Description
 - **Feature 2**: Description
 [3-6 bullet points with bold headers]
 
-## 📋 Usage
+## Usage
 [Clear instructions for when and how to invoke]
 
-## 🎛️ Parameters
+## Parameters
 [List parameters or "None required - auto-detects..."]
 
-## 💡 Examples
+## Examples
 ### Example 1: [Scenario]
 [Complete example with input and output]
 
-## 🎁 Output
+## Output
 [Show example output format with code blocks]
 
-## ⚠️ Important Notes
+## Important Notes
 [Warnings, limitations, false positives/negatives]
 ```
 
@@ -319,7 +319,7 @@ Use this checklist for each skill upgrade:
 - [ ] Push to remote
 - [ ] Update session snapshot
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Upgrading dead-code-hunter
 
@@ -392,7 +392,7 @@ Total: 42 runtime dependencies
 - Dependency statistics
 - Complete README with 400 lines
 
-## ⚠️ Important Notes
+## Important Notes
 
 **This skill applies a proven pattern, not arbitrary changes.**
 

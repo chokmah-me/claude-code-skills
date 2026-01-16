@@ -5,11 +5,11 @@ description: Find potentially unused functions, classes, and exports by comparin
 
 # Dead Code Hunter Skill
 
-## 🎯 Purpose
+## Description
 
 Identify exported symbols that are never imported across Python and JavaScript/TypeScript codebases. This skill helps find potentially unused code by comparing declarations against imports, enabling safe cleanup and technical debt reduction.
 
-## 🚀 Key Features
+## Features
 
 - **Language detection**: Auto-detects Python or JavaScript/TypeScript projects
 - **Source directory detection**: Automatically finds `src/`, `lib/`, or uses current directory
@@ -18,7 +18,7 @@ Identify exported symbols that are never imported across Python and JavaScript/T
 - **False positive awareness**: Includes verification helpers and warnings
 - **Token efficient**: ~500-1k tokens vs 50k+ for manual analysis
 
-## 📋 Usage
+## Usage
 
 When user requests dead code analysis:
 
@@ -27,7 +27,7 @@ When user requests dead code analysis:
 3. **Warn**: "Verify these aren't used via dynamic imports or external consumers"
 4. **Offer**: "Want me to verify any specific symbols? I can grep for all references to check actual usage."
 
-## 🎛️ Parameters
+## Parameters
 
 None required - the skill auto-detects:
 - **Language**: Python (*.py) or JavaScript/TypeScript (*.js, *.ts)
@@ -83,7 +83,7 @@ fi
 rm -rf "$TMPD"
 ```
 
-## 🎁 Output
+## Output
 
 ```
 === Python Dead Code Analysis ===
@@ -152,7 +152,7 @@ This shows:
 4. **Confirm with team** before deleting
 5. **Remove in separate commit** for easy revert
 
-## ⚠️ Important Notes
+## Important Notes
 
 **This skill identifies candidates for deletion, not guaranteed dead code.**
 
@@ -166,7 +166,7 @@ Always verify before deleting:
 
 Use the verification helper to check actual usage before deletion.
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Python Project
 
