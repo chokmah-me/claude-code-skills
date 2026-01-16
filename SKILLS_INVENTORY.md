@@ -1,7 +1,7 @@
 <!-- SKILLS_INVENTORY_START -->
 ## 📋 Skills Inventory
 
-*Last updated: 2026-01-16 19:55 UTC*
+*Last updated: 2026-01-16 20:05 UTC*
 
 **Total Skills:** 23  
 **Categories:** 6  
@@ -12,15 +12,11 @@
 #### Api Contract Sniffer
 Show API surface by finding route declarations (REST endpoints). Use when user says "show api surface", "list endpoints", or "what routes exist".
 
-**Purpose:** Map API endpoints without reading full controller files. Automatically detects framework (Flask/FastAPI/Express) and extracts precise endpoint locations with HTTP methods and routes.
-
 **Location:** `skills/analysis/code/api-contract-sniffer/`  
 **Documentation:** [README](skills/analysis/code/api-contract-sniffer/README.md)  
 
 #### Ascii Sanitizer
 Detect and remove unsafe Unicode/emoji characters that break YAML and GitHub Actions. Use when user says "sanitize code", "remove emojis", "fix unicode errors", or "yaml safe characters".
-
-**Purpose:** Prevent CI/CD pipeline failures caused by non-ASCII characters (emojis, smart quotes, Unicode symbols) in code, configuration files, and documentation. This skill detects problematic characters that break YAML parsers and GitHub Actions workflows, then provides safe ASCII replacements.
 
 **Location:** `skills/analysis/code/ascii-sanitizer/`  
 **Documentation:** No README  
@@ -28,15 +24,11 @@ Detect and remove unsafe Unicode/emoji characters that break YAML and GitHub Act
 #### Dead Code Hunter
 Find potentially unused functions, classes, and exports by comparing declarations to imports. Use when user says "find dead code", "unused functions", or "what can we delete".
 
-**Purpose:** Identify exported symbols that are never imported across Python and JavaScript/TypeScript codebases. This skill helps find potentially unused code by comparing declarations against imports, enabling safe cleanup and technical debt reduction.
-
 **Location:** `skills/analysis/code/dead-code-hunter/`  
 **Documentation:** [README](skills/analysis/code/dead-code-hunter/README.md)  
 
 #### Dependency Audit
 List top-level runtime dependencies from package.json, requirements.txt, or other lock files. Use when user says "audit deps", "check dependencies", or "what packages do we use".
-
-**Purpose:** List runtime dependencies with version numbers across multiple languages and package managers. Automatically detects dependency files and provides package count statistics for quick security audits.
 
 **Location:** `skills/analysis/code/dependency-audit/`  
 **Documentation:** [README](skills/analysis/code/dependency-audit/README.md)  
@@ -98,8 +90,6 @@ Enter token-efficient planning mode. Load ≤2k-token repo snapshot, adopt guard
 #### Matarao
 Publish and manage blog posts on Mataroa via API. Create, update, and retrieve posts from URLs or local files. Use when user says "publish to mataroa", "update blog post", or "fetch mataroa post".
 
-**Purpose:** Manage Mataroa blog posts directly from Claude Code without leaving your terminal. Publish from local markdown files or URLs, update existing posts, and retrieve content for editing (~700 tokens per operation vs 3000+ manual).
-
 **Location:** `skills/development/matarao/`  
 **Documentation:** [README](skills/development/matarao/README.md)  
 
@@ -113,8 +103,6 @@ Run tests impacted by recent changes and show last 20 lines of output. Use when 
 
 #### Refactoring
 Systematic, safe code restructuring with comprehensive validation, testing, and rollback capabilities
-
-**Purpose:** Provides systematic, safe code restructuring capabilities with comprehensive validation. Handles complex refactorings while preserving behavior through built-in testing, rollback mechanisms, and step-by-step validation. Routes to specialized workflow templates based on refactoring type.
 
 **Location:** `skills/development/refactoring/`  
 **Documentation:** [README](skills/development/refactoring/README.md)  
@@ -166,8 +154,6 @@ Automatically generate and update the unified skill manifest. Use when adding ne
 #### Session Snapshot
 Save session state snapshots with precise resume instructions for crash recovery or context clearing. Use when user says "save snapshot", "checkpoint progress", or before long/risky operations.
 
-**Purpose:** Create recoverable session snapshots that capture task context, decisions, and progress. Enables precise resume after crashes, context clears, or multi-day breaks.
-
 **Location:** `skills/meta/session-snapshot/`  
 **Documentation:** [README](skills/meta/session-snapshot/README.md)  
 
@@ -189,8 +175,6 @@ Intelligent skill recommendation system that analyzes current context, user beha
 
 #### Skill Upgrader
 Systematically upgrade existing Claude Code skills to production quality with multi-language support, precise output, and comprehensive documentation. Use when improving substandard skills or adding missing features.
-
-**Purpose:** Systematically upgrade existing Claude Code skills from basic/broken implementations to production-ready quality. Applies a proven pattern: multi-language detection, precise output formats, verification helpers, and comprehensive documentation.
 
 **Location:** `skills/meta/skill-upgrader/`  
 **Documentation:** [README](skills/meta/skill-upgrader/README.md)  
