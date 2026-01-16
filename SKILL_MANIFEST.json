@@ -1,0 +1,201 @@
+{
+  "version": "1.0",
+  "timestamp": "",
+  "total_skills": 23,
+  "categories": {
+    "analysis": [
+      "anti-pattern-sniffer",
+      "api-contract-sniffer",
+      "ascii-sanitizer",
+      "dead-code-hunter",
+      "dependency-audit",
+      "lemma-dependency-graph",
+      "proof-obligations-snapshot",
+      "quantum-circuit-optimizer",
+      "tactic-usage-count"
+    ],
+    "development": [
+      "lean-plan",
+      "matarao",
+      "quick-test-runner",
+      "refactoring"
+    ],
+    "git": [
+      "diff-summariser",
+      "migrate-repo",
+      "repo-briefing"
+    ],
+    "meta": [
+      "claude-startup-integration",
+      "manifest-generator",
+      "session-snapshot",
+      "skill-extractor",
+      "skill-recommendation-engine",
+      "skill-upgrader",
+      "startup-skill-showcase"
+    ]
+  },
+  "skills": [
+    {
+      "name": "anti-pattern-sniffer",
+      "path": "formal\\anti-pattern-sniffer",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "api-contract-sniffer",
+      "path": "code\\api-contract-sniffer",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "ascii-sanitizer",
+      "path": "code\\ascii-sanitizer",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "dead-code-hunter",
+      "path": "code\\dead-code-hunter",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "dependency-audit",
+      "path": "code\\dependency-audit",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "lemma-dependency-graph",
+      "path": "formal\\lemma-dependency-graph",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "proof-obligations-snapshot",
+      "path": "formal\\proof-obligations-snapshot",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "quantum-circuit-optimizer",
+      "path": "quantum\\quantum-circuit-optimizer",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "tactic-usage-count",
+      "path": "formal\\tactic-usage-count",
+      "description": "",
+      "triggers": [],
+      "category": "analysis"
+    },
+    {
+      "name": "lean-plan",
+      "path": "development\\lean-plan",
+      "description": "",
+      "triggers": [],
+      "category": "development"
+    },
+    {
+      "name": "matarao",
+      "path": "development\\matarao",
+      "description": "",
+      "triggers": [],
+      "category": "development"
+    },
+    {
+      "name": "quick-test-runner",
+      "path": "development\\quick-test-runner",
+      "description": "",
+      "triggers": [],
+      "category": "development"
+    },
+    {
+      "name": "refactoring",
+      "path": "development\\refactoring",
+      "description": "",
+      "triggers": [],
+      "category": "development"
+    },
+    {
+      "name": "diff-summariser",
+      "path": "git\\diff-summariser",
+      "description": "",
+      "triggers": [],
+      "category": "git"
+    },
+    {
+      "name": "migrate-repo",
+      "path": "git\\migrate-repo",
+      "description": "",
+      "triggers": [],
+      "category": "git"
+    },
+    {
+      "name": "repo-briefing",
+      "path": "git\\repo-briefing",
+      "description": "",
+      "triggers": [],
+      "category": "git"
+    },
+    {
+      "name": "claude-startup-integration",
+      "path": "meta\\claude-startup-integration",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "manifest-generator",
+      "path": "meta\\manifest-generator",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "session-snapshot",
+      "path": "meta\\session-snapshot",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "skill-extractor",
+      "path": "meta\\skill-extractor",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "skill-recommendation-engine",
+      "path": "meta\\skill-recommendation-engine",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "skill-upgrader",
+      "path": "meta\\skill-upgrader",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    },
+    {
+      "name": "startup-skill-showcase",
+      "path": "meta\\startup-skill-showcase",
+      "description": "",
+      "triggers": [],
+      "category": "meta"
+    }
+  ]
+}

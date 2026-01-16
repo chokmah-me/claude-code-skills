@@ -1,9 +1,21 @@
 # Claude Code Skills Directory
 
-[![Skill Template Validator](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-template-validator.yml)
+## Workflow Status
+
+**Quality Checks**:
+[![Documentation Validation](https://github.com/chokmah-me/claude-code-skills/actions/workflows/documentation-validation.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/documentation-validation.yml)
+[![Consistency Check](https://github.com/chokmah-me/claude-code-skills/actions/workflows/consistency-check.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/consistency-check.yml)
+[![Skill Testing](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-testing.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/skill-testing.yml)
+
+**Maintenance**:
+[![Manifest Builder](https://github.com/chokmah-me/claude-code-skills/actions/workflows/manifest-builder.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/manifest-builder.yml)
+[![Dependency Analysis](https://github.com/chokmah-me/claude-code-skills/actions/workflows/dependency-analysis.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/dependency-analysis.yml)
+
+**Other**:
 [![README Auto-Update](https://github.com/chokmah-me/claude-code-skills/actions/workflows/readme-auto-update.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/readme-auto-update.yml)
-[![Freshness Maintenance](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/freshness-maintenance.yml)
 [![Snapshot State Manager](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml/badge.svg)](https://github.com/chokmah-me/claude-code-skills/actions/workflows/snapshot-state-manager.yml)
+
+For details on all workflows, see [WORKFLOWS.md](WORKFLOWS.md).
 
 **22 production-ready skills** organized hierarchically for efficient AI-assisted development workflows.
 
