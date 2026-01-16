@@ -5,15 +5,12 @@ description: Publish and manage blog posts on Mataroa via API. Create, update, a
 
 # matarao
 
+
 ## Description
 Manage Mataroa blog posts directly from Claude Code without leaving your terminal. Publish from local markdown files or URLs, update existing posts, and retrieve content for editing (~700 tokens per operation vs 3000+ manual).
 
-## Features
-- **Create posts** from local markdown files or remote URLs
-- **Update existing posts** with new content or metadata
-- **Retrieve posts** to review or edit locally
-- **Secure authentication** via JSON config file
-- **No rate limiting** - unlimited API calls to Mataroa
+- User says 'use [skill-name]' or mentions the skill by name
+- Relevant to the current task or discussion
 
 ## Usage
 
@@ -110,6 +107,13 @@ curl -X PATCH "https://mataroa.blog/api/posts/$slug/" \
 | slug | string | Yes (get/update) | Post URL slug identifier |
 | published_at | ISO date | No | Publication timestamp (ISO 8601 format, e.g. "2026-01-13") |
 | source | path/URL | Yes | Local file path or remote URL for content |
+
+## Features
+- **Create posts** from local markdown files or remote URLs
+- **Update existing posts** with new content or metadata
+- **Retrieve posts** to review or edit locally
+- **Secure authentication** via JSON config file
+- **No rate limiting** - unlimited API calls to Mataroa
 
 ## Examples
 
@@ -261,190 +265,3 @@ if [ ! -f "path/to/post.md" ]; then
   exit 1
 fi
 ```
-
-## 🔄 Integration with Other Skills
-
-### With session-snapshot
-```bash
-# Save checkpoint before bulk publishing
-/session-snapshot
-
-# Publish multiple posts
-for file in blog/*.md; do
-  title=$(basename "$file" .md) && \
-  body=$(cat "$file") && \
-  api_key=$(jq -r '.api_key' ~/.claude/matarao-config.json) && \
-  curl -X POST https://mataroa.blog/api/posts/ \
-    -H "Authorization: Bearer $api_key" \
-    -H "Content-Type: application/json" \
-    -d "{\"title\":\"$title\",\"body\":\"$body\"}"
-done
-
-# Save updated state
-/session-snapshot
-```
-
-### With repo-briefing
-```bash
-# Document your repository on your blog
-/repo-briefing > repo-summary.md
-
-# Then publish to Mataroa
-title="My Project Overview" && \
-body=$(cat repo-summary.md) && \
-api_key=$(jq -r '.api_key' ~/.claude/matarao-config.json) && \
-curl -X POST https://mataroa.blog/api/posts/ \
-  -H "Authorization: Bearer $api_key" \
-  -H "Content-Type: application/json" \
-  -d "{\"title\":\"$title\",\"body\":\"$body\"}"
-```
-
-### With lean-plan
-```bash
-# Plan migration workflow
-/lean-plan
-
-# Then execute with matarao skill:
-# 1. Export posts from old platform
-# 2. Convert to markdown
-# 3. Publish to Mataroa using matarao skill
-```
-
-## 🎯 Use Cases
-
-1. **Documentation Publishing**: Publish project docs from repository to blog
-2. **Blog Migration**: Migrate existing posts from other platforms to Mataroa
-3. **Content Syndication**: Publish articles from multiple sources to your blog
-4. **Draft Management**: Create drafts locally, publish when ready
-5. **Automated Posting**: CI/CD integration for automated blog updates
-6. **Content Archival**: Retrieve posts for local backup or editing
-7. **Multi-site Publishing**: Publish same content to multiple Mataroa blogs
-
-## 🚨 Troubleshooting
-
-**Issue 1: JSON parsing errors**
-```bash
-# Symptoms: "Invalid JSON" errors
-# Solution: Properly escape quotes and special characters
-
-# Use jq to safely encode JSON
-body_json=$(jq -Rs '.' < post.md)
-curl -X POST https://mataroa.blog/api/posts/ \
-  -H "Authorization: Bearer $api_key" \
-  -H "Content-Type: application/json" \
-  -d "{\"title\":\"$title\",\"body\":$body_json}"
-```
-
-**Issue 2: Config file not loading**
-```bash
-# Symptoms: "Authorization required" despite having config
-# Solution: Verify config file format
-
-cat ~/.claude/matarao-config.json
-# Should output valid JSON with api_key field
-
-# Test with jq:
-jq -r '.api_key' ~/.claude/matarao-config.json
-```
-
-**Issue 3: Slug conflicts**
-```bash
-# Symptoms: "Post with slug already exists"
-# Solution: Update existing post instead of creating new
-
-# First, try to get the existing post
-curl -X GET "https://mataroa.blog/api/posts/$slug/" \
-  -H "Authorization: Bearer $api_key"
-
-# If exists, use PATCH instead of POST
-curl -X PATCH "https://mataroa.blog/api/posts/$slug/" \
-  -H "Authorization: Bearer $api_key" \
-  -H "Content-Type: application/json" \
-  -d "{\"body\":\"$new_body\"}"
-```
-
-## 🛠️ Advanced Configuration
-
-### Custom Config Location
-```bash
-# Use environment variable for custom config path
-export MATARAO_CONFIG="/custom/path/to/config.json"
-api_key=$(jq -r '.api_key' "${MATARAO_CONFIG:-~/.claude/matarao-config.json}")
-```
-
-### Multiple Blogs
-```json
-// ~/.claude/matarao-config.json
-{
-  "default": "dybilar",
-  "dybilar": {
-    "api_key": "your_key_here",
-    "base_url": "https://mataroa.blog/api/",
-    "blog_url": "https://dybilar.mataroa.blog"
-  },
-  "torah": {
-    "api_key": "your_key_here",
-    "base_url": "https://mataroa.blog/api/",
-    "blog_url": "https://torah.mataroa.blog"
-  }
-}
-```
-
-**Method 1: Using jq (if available)**
-```bash
-# Use specific blog profile
-profile="torah" && \
-api_key=$(jq -r ".$profile.api_key" ~/.claude/matarao-config.json)
-```
-
-**Method 2: Direct API key (no jq required)**
-```bash
-# For dybilar blog
-api_key="your_dybilar_key"
-
-# For torah blog
-api_key="your_torah_key"
-```
-
-**Method 3: JSON file payload (recommended - no escaping issues)**
-```bash
-# Create payload file
-cat > /tmp/post.json << 'EOF'
-{
-  "title": "My Post Title",
-  "body": "# My Post\n\nContent with proper formatting..."
-}
-EOF
-
-# Publish to specific blog
-curl -X POST https://mataroa.blog/api/posts/ \
-  -H "Authorization: Bearer $api_key" \
-  -H "Content-Type: application/json" \
-  -d @/tmp/post.json
-```
-
-### Content Preprocessing
-```bash
-# Remove frontmatter before posting
-body=$(sed '1,/^---$/d' < post.md | sed '1,/^---$/d')
-
-# Or convert from other formats
-body=$(pandoc -f docx -t markdown < article.docx)
-```
-
-## Token Efficiency
-
-- Config loading: ~100 tokens
-- Single API operation: ~300-500 tokens
-- Local file reading: ~200-400 tokens (depends on file size)
-- URL fetching: ~300-600 tokens
-- Total per operation: **700-1200 tokens**
-- Alternative (manual): ~3000+ tokens (reading API docs, crafting curl commands)
-- **60-70% reduction** in API integration overhead
-
----
-
-**Related Skills**:
-- `git/repo-briefing` - Generate blog content from repository
-- `meta/session-snapshot` - Save state during bulk operations
-- `development/lean-plan` - Plan content migration workflows
