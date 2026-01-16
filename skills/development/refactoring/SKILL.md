@@ -5,18 +5,13 @@ description: Systematic, safe code restructuring with comprehensive validation, 
 
 # Refactoring Skill
 
+
 ## Description
 
 Provides systematic, safe code restructuring capabilities with comprehensive validation. Handles complex refactorings while preserving behavior through built-in testing, rollback mechanisms, and step-by-step validation. Routes to specialized workflow templates based on refactoring type.
 
-## Features
-
-- **Safety-First Approach**: Automatic test execution before and after changes
-- **Multiple Refactoring Types**: Extract, modernize, triage workflows
-- **Rollback Capability**: Undo changes if tests fail
-- **Token Efficient**: ~1.2K tokens vs ~3K manual refactoring (60% reduction)
-- **Step-by-Step Validation**: Incremental changes with verification at each step
-- **Workflow Routing**: Directs to specialized templates for different refactoring patterns
+- User says 'use [skill-name]' or mentions the skill by name
+- Relevant to the current task or discussion
 
 ## Usage
 
@@ -48,6 +43,15 @@ The skill analyzes your request and routes to the appropriate workflow template 
 | preserve_behavior | boolean | No | Ensure behavior preservation (default: true) |
 | run_tests | boolean | No | Execute tests before/after (default: true) |
 | incremental | boolean | No | Apply changes incrementally with validation (default: true) |
+
+## Features
+
+- **Safety-First Approach**: Automatic test execution before and after changes
+- **Multiple Refactoring Types**: Extract, modernize, triage workflows
+- **Rollback Capability**: Undo changes if tests fail
+- **Token Efficient**: ~1.2K tokens vs ~3K manual refactoring (60% reduction)
+- **Step-by-Step Validation**: Incremental changes with verification at each step
+- **Workflow Routing**: Directs to specialized templates for different refactoring patterns
 
 ## Examples
 
@@ -145,36 +149,3 @@ The skill routes to specialized templates in the `workflows/` directory:
 - **workflows/triage.md**: Code quality assessment and prioritization
 
 See `README.md` for detailed usage guide and comprehensive examples.
-
-## 🔄 Integration with Other Skills
-
-- **quick-test-runner**: Executes tests to validate refactorings
-- **dead-code-hunter**: Identifies unused code before refactoring
-- **session-snapshot**: Save state before major refactorings
-- **lean-plan**: Plan complex multi-step refactoring sequences
-
-## 🎯 Best Practices
-
-1. **Test First**: Ensure test suite exists and passes before refactoring
-2. **Small Steps**: Break large refactorings into incremental changes
-3. **Save Snapshots**: Use session-snapshot before major restructuring
-4. **Review Changes**: Examine diffs before committing
-5. **Update Documentation**: Ensure docs reflect new structure
-
-## 🚨 Troubleshooting
-
-**Tests Failing After Refactoring**
-- Review change summary for unintended modifications
-- Check for missed import updates
-- Use rollback instructions to undo changes
-- Apply changes more incrementally
-
-**Skill Routes to Wrong Workflow**
-- Explicitly specify refactoring_type parameter
-- Use more specific natural language description
-- Invoke workflow file directly
-
-**Performance Issues**
-- Large codebases may require extended processing time
-- Consider refactoring in smaller scopes
-- Use incremental: false for faster execution (less safe)

@@ -5,42 +5,18 @@ description: Summarize git diff changes with file stats and first 30 changed lin
 
 # Diff Summariser Skill
 
-## Purpose
-Review PR/commit changes without loading entire files (~400 tokens).
 
-## Instructions
+A concise description of what this skill does and its primary purpose.
 
-When user requests a diff summary:
+- User says 'use [skill-name]' or mentions the skill by name
+- Relevant to the current task or discussion
 
-1. **Run the command** to get stats and key changes
-2. **Present the output** showing:
-   - Files touched with +/- counts
-   - First 30 changed lines (additions/deletions)
-3. **Offer**: "Want to see specific files in detail?"
+When user requests this skill:
 
-## Command
+1. Perform the primary action
+2. Report findings or results
+3. Offer next steps or related actions
 
-```bash
-git diff --stat HEAD~1..HEAD && echo "---" && git diff HEAD~1..HEAD --no-ext-diff | grep -E "^\+|^\-" | head -30
-```
+No additional parameters required.
 
-## Output Format
-
-```
-[File stats showing insertions/deletions]
----
-[First 30 lines of actual changes]
-```
-
-## Use Cases
-
-- Quick PR review before detailed analysis
-- Understand scope of recent commit
-- Identify which files had most changes
-- Spot patterns in additions/deletions
-
-## Token Efficiency
-
-- ~400 tokens total
-- Alternative would be 5-10k tokens reading all changed files
-- 95% reduction in context loading
+Results of the skill execution in a clear, actionable format.
