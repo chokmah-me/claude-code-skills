@@ -5,11 +5,11 @@ description: Show API surface by finding route declarations (REST endpoints). Us
 
 # API Contract Sniffer Skill
 
-## 🎯 Purpose
+## Description
 
 Map API endpoints without reading full controller files. Automatically detects framework (Flask/FastAPI/Express) and extracts precise endpoint locations with HTTP methods and routes.
 
-## 🚀 Key Features
+## Features
 
 - **Language detection**: Auto-detects Python (Flask/FastAPI) or JavaScript/TypeScript (Express) frameworks
 - **Source directory detection**: Automatically finds `src/`, `app/`, `api/`, or uses current directory
@@ -18,7 +18,7 @@ Map API endpoints without reading full controller files. Automatically detects f
 - **Cross-platform**: Uses `mktemp` for reliable temp file handling on Windows/Unix
 - **Token efficient**: ~600-800 tokens vs 20k+ for reading all controllers
 
-## 📋 Usage
+## Usage
 
 When user requests API surface mapping:
 
@@ -81,7 +81,7 @@ fi
 rm -rf "$TMPD"
 ```
 
-## 🎁 Output
+## Output
 
 ### Python (Flask/FastAPI)
 ```
@@ -107,7 +107,7 @@ Each line shows:
 - **HTTP method**: GET, POST, PUT, DELETE, PATCH, USE
 - **Route path**: The URL path for the endpoint
 
-## 🎛️ Parameters
+## Parameters
 
 None required - the skill auto-detects:
 - **Language**: Python (*.py) or JavaScript/TypeScript (*.js, *.ts)
@@ -159,7 +159,7 @@ This shows:
 - `router.post('/api/path', handler)`
 - `app.use('/middleware')`
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Flask API
 ```bash
@@ -198,7 +198,7 @@ tests/test_users.py:32:    response = client.post("/api/users", json=data)
 # Endpoint is tested ✓
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 **This skill identifies route declarations, not runtime behavior.**
 

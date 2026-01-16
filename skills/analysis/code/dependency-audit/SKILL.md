@@ -5,11 +5,11 @@ description: List top-level runtime dependencies from package.json, requirements
 
 # Dependency Audit Skill
 
-## 🎯 Purpose
+## Description
 
 List runtime dependencies with version numbers across multiple languages and package managers. Automatically detects dependency files and provides package count statistics for quick security audits.
 
-## 🚀 Key Features
+## Features
 
 - **Multi-language support**: Node.js, Python, Rust, Go, Ruby, PHP, Java
 - **Version extraction**: Shows package versions alongside names
@@ -18,7 +18,7 @@ List runtime dependencies with version numbers across multiple languages and pac
 - **Token efficient**: ~600-800 tokens vs 20k+ for parsing full lockfiles
 - **CVE check ready**: Structured output for vulnerability research
 
-## 📋 Usage
+## Usage
 
 When user requests dependency audit:
 
@@ -80,7 +80,7 @@ else
 fi
 ```
 
-## 🎁 Output
+## Output
 
 ### Node.js Project
 ```
@@ -117,7 +117,7 @@ clap={ version="4.3", features=["derive"] }
 Total: 15 dependencies
 ```
 
-## 🎛️ Parameters
+## Parameters
 
 None required - the skill auto-detects:
 - **Language**: Checks for dependency files in priority order
@@ -159,7 +159,7 @@ cargo outdated  # Rust
 4. **Count total**: Display total number of dependencies found
 5. **Limit output**: First 20 entries for quick overview
 
-## 💡 Examples
+## Examples
 
 ### Example 1: Node.js Security Audit
 ```bash
@@ -212,7 +212,7 @@ tokio={ version="1.28", features=["full"] }
 Total: 8 dependencies
 ```
 
-## ⚠️ Important Notes
+## Important Notes
 
 **This skill extracts declared dependencies, not installed versions.**
 
